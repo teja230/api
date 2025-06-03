@@ -84,6 +84,11 @@ public class HttpHelper {
     public static JsonElement sendHttpRequest(HttpURLConnection httpURLConnection, String appId) throws IOException {
         JsonElement jsonResponse = new JsonObject();
         int connectionTimeout = REST_CLIENT_TIMEOUT_MS;
+        // Check for null HttpURLConnection
+        if (httpURLConnection == null) {
+            logger.warn("[{}][{}][{}] HTTPURLConnection not a valid value in sendHttpRequest()", appId, API_SERVICE, INFO_1652);
+            return jsonResponse;
+        }
         // Implement retry for request timeout.
         int count = 0;
         while (count < MAX_RETRY_SERVICE_REQUEST) {
