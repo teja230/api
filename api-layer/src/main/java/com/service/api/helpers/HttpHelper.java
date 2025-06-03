@@ -120,9 +120,6 @@ public class HttpHelper {
         }
         String response = StringUtils.toString(httpURLConnection.getInputStream());
         if (!Strings.isNullOrEmpty(response)) {
-            GsonBuilder gsonBuilder = new GsonBuilder();
-            Gson gson = gsonBuilder.create();
-
             return gson.fromJson(response, JsonElement.class);
         }
         return jsonResponse;
