@@ -1,0 +1,25 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-layer
+  datasource:
+    url: jdbc:postgresql://localhost:5432/agentsdb
+    username: agents_user
+    password: secret
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+slack:
+  webhook:
+    url: "https://hooks.slack.com/services/your/webhook/url"
+  oauth:
+
+redis:
+  host: localhost
+  port: 6379
+  # password: your_redis_password (uncomment if needed)
