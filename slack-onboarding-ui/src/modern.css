@@ -1,0 +1,198 @@
+/* Add Google Fonts for a modern look */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+body {
+  background: linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%);
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  color: #23272f;
+}
+
+.main-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(120deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(60, 60, 120, 0.12);
+  padding: 40px 36px 32px 36px;
+  min-width: 350px;
+  max-width: 420px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: box-shadow 0.2s;
+}
+.card:hover {
+  box-shadow: 0 12px 36px rgba(60, 60, 120, 0.18);
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #4A154B;
+  margin-bottom: 18px;
+  letter-spacing: -1px;
+  text-align: center;
+  background: linear-gradient(90deg, #4A154B 40%, #611f69 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.status-card {
+  margin-bottom: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.status-connected {
+  color: #2eb67d;
+  font-weight: 600;
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 6px;
+  background: #e6f9f0;
+}
+.status-disconnected {
+  color: #e01e5a;
+  font-weight: 600;
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 6px;
+  background: #fbeaec;
+}
+.status-loading {
+  color: #aaa;
+  font-weight: 500;
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 6px;
+  background: #f3f3f7;
+}
+
+.slack-btn {
+  background: linear-gradient(90deg, #4A154B 60%, #611f69 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 32px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 18px 0 24px 0;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(76, 21, 75, 0.08);
+  display: flex;
+  align-items: center;
+  transition: background 0.2s;
+  letter-spacing: 0.5px;
+  gap: 8px;
+  outline: none;
+}
+.slack-btn:hover {
+  background: linear-gradient(90deg, #611f69 60%, #4A154B 100%);
+}
+.slack-btn:active {
+  transform: scale(0.98);
+}
+.slack-icon {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  margin-right: 10px;
+  background: url('https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/slack.svg') no-repeat center/contain;
+  vertical-align: middle;
+  filter: drop-shadow(0 1px 2px rgba(76, 21, 75, 0.10));
+}
+
+.teams-list {
+  width: 100%;
+  margin-top: 24px;
+}
+.teams-list h3 {
+  font-size: 1.1rem;
+  color: #4A154B;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+.team-item {
+  background: #f6f6fa;
+  border-radius: 6px;
+  padding: 8px 14px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem;
+  color: #333;
+  box-shadow: 0 1px 3px rgba(76, 21, 75, 0.04);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.team-item:hover {
+  background: #e0e7ef;
+  box-shadow: 0 2px 8px rgba(60, 60, 120, 0.10);
+}
+.team-name {
+  font-weight: 500;
+}
+.team-id {
+  color: #aaa;
+  font-size: 0.95em;
+}
+
+.success-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 80px;
+  min-height: 60vh;
+}
+.success-card {
+  background: #e6f9f0;
+  border-radius: 12px;
+  padding: 32px 40px;
+  box-shadow: 0 4px 16px rgba(46, 182, 125, 0.08);
+  color: #2eb67d;
+  font-size: 1.3rem;
+  font-weight: 600;
+  text-align: center;
+  border: 1.5px solid #e0e7ef;
+  background: linear-gradient(90deg, #e6f9f0 60%, #c3f5e2 100%);
+}
+.fail-card {
+  background: #fbeaec;
+  border-radius: 12px;
+  padding: 32px 40px;
+  box-shadow: 0 4px 16px rgba(224, 30, 90, 0.08);
+  color: #e01e5a;
+  font-size: 1.3rem;
+  font-weight: 600;
+  text-align: center;
+  border: 1.5px solid #e0e7ef;
+  background: linear-gradient(90deg, #fbeaec 60%, #f9d6e2 100%);
+}
+.fail-msg {
+  color: #e01e5a;
+  font-size: 1.1rem;
+  margin-top: 10px;
+  font-weight: 500;
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+  .card {
+    padding: 24px 8px 18px 8px;
+    min-width: unset;
+    max-width: 98vw;
+  }
+  .success-card, .fail-card {
+    padding: 18px 8px;
+  }
+}
