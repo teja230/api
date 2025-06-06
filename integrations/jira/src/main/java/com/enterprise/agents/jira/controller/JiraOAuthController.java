@@ -1,19 +1,16 @@
 package com.enterprise.agents.jira.controller;
 
 import com.enterprise.agents.common.config.OAuthConfig;
-import com.enterprise.agents.common.exception.OAuthException;
 import com.enterprise.agents.common.model.ApiResponse;
 import com.enterprise.agents.common.util.OAuthUtils;
 import com.enterprise.agents.jira.model.JiraOAuthToken;
 import com.enterprise.agents.jira.service.JiraService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -33,36 +30,37 @@ public class JiraOAuthController {
 
     @GetMapping("/oauth/callback")
     public ResponseEntity<ApiResponse<Map<String, Object>>> handleCallback(
-            @RequestParam String code,
-            @RequestParam String state) {
-        try {
-            var request = OAuthUtils.buildTokenRequest(oauthConfig, code);
-            var response = restTemplate.postForEntity(
-                    oauthConfig.getTokenUrl(),
-                    request,
-                    Map.class
-            );
+            @RequestParam(required = false) String code,
+            @RequestParam(required = false) String state,
+            @RequestParam(required = false) String error,
+            @RequestParam(required = false) String error_description) {
 
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                Map<String, Object> tokenData = response.getBody();
-                JiraOAuthToken token = new JiraOAuthToken();
-                token.setEnterpriseId(state);
-                token.setAccessToken((String) tokenData.get("access_token"));
-                token.setRefreshToken((String) tokenData.get("refresh_token"));
-                token.setScope((String) tokenData.get("scope"));
-                token.setSiteUrl((String) tokenData.get("site_url"));
-                token.setAccountId((String) tokenData.get("account_id"));
-                token.setDisplayName((String) tokenData.get("display_name"));
-                token.setEmail((String) tokenData.get("email"));
+        Map<String, Object> response = new HashMap<>();
 
-                jiraService.saveToken(token);
-                return ResponseEntity.ok(ApiResponse.success(tokenData));
-            }
-
-            throw new OAuthException("invalid_response", "Failed to exchange code for token");
-        } catch (Exception e) {
-            throw new OAuthException("token_exchange_failed", e.getMessage(), e);
+        if (error != null) {
+            response.put("status", "error");
+            response.put("error", error);
+            response.put("error_description", error_description);
+            return ResponseEntity.ok(ApiResponse.success(response));
         }
+
+        JiraOAuthToken token = jiraService.exchangeCodeForToken(code, state);
+        response.put("status", "success");
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<Map<String, String>> refreshToken(@RequestParam String enterpriseId) {
+        Map<String, String> response = new HashMap<>();
+        JiraOAuthToken token = jiraService.refreshToken(enterpriseId);
+
+        if (token != null) {
+            response.put("status", "success");
+        } else {
+            response.put("status", "error");
+        }
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/status")

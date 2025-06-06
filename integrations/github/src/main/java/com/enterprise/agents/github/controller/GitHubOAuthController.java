@@ -7,6 +7,7 @@ import com.enterprise.agents.common.util.OAuthUtils;
 import com.enterprise.agents.github.model.GitHubOAuthToken;
 import com.enterprise.agents.github.service.GitHubService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,13 +15,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/github")
 @RequiredArgsConstructor
 public class GitHubOAuthController {
-    private final OAuthConfig oauthConfig;
+    private final @Qualifier("gitHubConfig") OAuthConfig oauthConfig;
     private final RestTemplate restTemplate;
     private final GitHubService githubService;
 
@@ -75,7 +77,7 @@ public class GitHubOAuthController {
     }
 
     @GetMapping("/repositories")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> getRepositories(@RequestParam String enterpriseId) {
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getRepositories(@RequestParam String enterpriseId) {
         var repos = githubService.getRepositories(enterpriseId);
         return ResponseEntity.ok(ApiResponse.success(repos));
     }

@@ -1,6 +1,5 @@
 package com.enterprise.agents.github.controller;
 
-import com.enterprise.agents.common.config.TestConfig;
 import com.enterprise.agents.github.model.GitHubOAuthToken;
 import com.enterprise.agents.github.repository.GitHubOAuthTokenRepository;
 import com.enterprise.agents.github.service.GitHubService;
@@ -10,12 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -23,7 +22,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Import(TestConfig.class)
 @ActiveProfiles("test")
 class GitHubOAuthControllerTest {
 
@@ -138,8 +136,7 @@ class GitHubOAuthControllerTest {
         token.setRefreshToken("refresh-token");
         tokenRepository.save(token);
 
-        when(githubService.refreshToken(anyString()))
-                .thenReturn(new GitHubOAuthToken());
+        doNothing().when(githubService).refreshToken(anyString());
 
         // When/Then
         mockMvc.perform(post("/oauth/github/refresh")

@@ -1,10 +1,10 @@
 package com.enterprise.agents.common.model;
 
+import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,7 +32,7 @@ public class CompanyConfig {
     @Column
     private String secondaryColor;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "company_config_settings",
             joinColumns = @JoinColumn(name = "company_config_id"))
     @MapKeyColumn(name = "setting_key")

@@ -9,4 +9,6 @@ import java.util.Optional;
 @Repository
 public interface SlackOAuthTokenRepository extends JpaRepository<SlackOAuthToken, Long> {
     Optional<SlackOAuthToken> findByEnterpriseId(String enterpriseId);
+
+    Optional<SlackOAuthToken> findByTeamId(String teamId);
 } 

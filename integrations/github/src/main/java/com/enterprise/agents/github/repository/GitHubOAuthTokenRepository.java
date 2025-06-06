@@ -9,4 +9,6 @@ import java.util.Optional;
 @Repository
 public interface GitHubOAuthTokenRepository extends JpaRepository<GitHubOAuthToken, Long> {
     Optional<GitHubOAuthToken> findByEnterpriseId(String enterpriseId);
+
+    Optional<GitHubOAuthToken> findById(Long id);
 } 

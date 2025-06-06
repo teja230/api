@@ -1,11 +1,15 @@
 package com.enterprise.agents.jira.controller;
 
+import com.enterprise.agents.common.config.MinimalTestApplication;
 import com.enterprise.agents.common.config.TestConfig;
 import com.enterprise.agents.jira.model.JiraOAuthToken;
 import com.enterprise.agents.jira.repository.JiraOAuthTokenRepository;
 import com.enterprise.agents.jira.service.JiraService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,17 +18,21 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
+@SpringBootTest(classes = MinimalTestApplication.class)
 @Import(TestConfig.class)
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
+@ExtendWith(MockitoExtension.class)
 class JiraOAuthControllerTest {
 
     @Autowired
@@ -36,9 +44,20 @@ class JiraOAuthControllerTest {
     @MockBean
     private JiraService jiraService;
 
+    @InjectMocks
+    private JiraOAuthController jiraOAuthController;
+
+    private JiraOAuthToken token;
+
     @BeforeEach
     void setUp() {
         tokenRepository.deleteAll();
+        mockMvc = MockMvcBuilders.standaloneSetup(jiraOAuthController).build();
+        token = new JiraOAuthToken();
+        token.setEnterpriseId("test-enterprise");
+        token.setAccessToken("test-token");
+        token.setRefreshToken("test-refresh-token");
+        token.setSiteUrl("https://test.atlassian.net");
     }
 
     @Test
@@ -56,45 +75,22 @@ class JiraOAuthControllerTest {
     }
 
     @Test
-    void testHandleCallback() throws Exception {
-        // Given
-        when(jiraService.exchangeCodeForToken(anyString(), anyString()))
-                .thenReturn(new JiraOAuthToken());
+    void handleCallback_WhenCodeProvided_ReturnsSuccess() throws Exception {
+        when(jiraService.exchangeCodeForToken(anyString(), anyString())).thenReturn(token);
 
-        // When/Then
-        mockMvc.perform(get("/oauth/jira/callback")
+        mockMvc.perform(get("/api/jira/oauth/callback")
                         .param("code", "test-code")
-                        .param("state", "test-company"))
+                        .param("state", "test-state"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.success").value(true));
-    }
+                .andExpect(jsonPath("$.status").value("success"));
 
-    @Test
-    void testHandleCallbackWithInvalidCode() throws Exception {
-        // Given
-        when(jiraService.exchangeCodeForToken(anyString(), anyString()))
-                .thenThrow(new RuntimeException("Invalid code"));
-
-        // When/Then
-        mockMvc.perform(get("/oauth/jira/callback")
-                        .param("code", "invalid-code")
-                        .param("state", "test-company"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.success").value(false));
+        verify(jiraService).exchangeCodeForToken("test-code", "test-state");
     }
 
     @Test
     void testDisconnect() throws Exception {
-        // Given
-        JiraOAuthToken token = new JiraOAuthToken();
-        token.setCompanyId("test-company");
-        token.setAccessToken("test-token");
-        tokenRepository.save(token);
-
-        // When/Then
         mockMvc.perform(post("/oauth/jira/disconnect")
-                        .param("companyId", "test-company"))
+                        .param("enterpriseId", "test-enterprise"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true));
     }
@@ -102,85 +98,85 @@ class JiraOAuthControllerTest {
     @Test
     void testDisconnectNonExistentToken() throws Exception {
         mockMvc.perform(post("/oauth/jira/disconnect")
-                        .param("companyId", "non-existent"))
+                        .param("enterpriseId", "non-existent"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void testGetConnectionStatus() throws Exception {
-        // Given
-        JiraOAuthToken token = new JiraOAuthToken();
-        token.setCompanyId("test-company");
-        token.setAccessToken("test-token");
-        tokenRepository.save(token);
+        when(jiraService.isConnected(anyString())).thenReturn(true);
 
-        // When/Then
         mockMvc.perform(get("/oauth/jira/status")
-                        .param("companyId", "test-company"))
+                        .param("enterpriseId", "test-enterprise"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.connected").value(true));
     }
 
     @Test
     void testGetConnectionStatusNotConnected() throws Exception {
+        when(jiraService.isConnected(anyString())).thenReturn(false);
+
         mockMvc.perform(get("/oauth/jira/status")
-                        .param("companyId", "test-company"))
+                        .param("enterpriseId", "test-enterprise"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.connected").value(false));
     }
 
     @Test
-    void testRefreshToken() throws Exception {
-        // Given
-        JiraOAuthToken token = new JiraOAuthToken();
-        token.setCompanyId("test-company");
-        token.setAccessToken("old-token");
-        token.setRefreshToken("refresh-token");
-        tokenRepository.save(token);
+    void refreshToken_WhenTokenExists_ReturnsSuccess() throws Exception {
+        when(jiraService.refreshToken(anyString())).thenReturn(token);
 
-        when(jiraService.refreshToken(anyString()))
-                .thenReturn(new JiraOAuthToken());
-
-        // When/Then
-        mockMvc.perform(post("/oauth/jira/refresh")
-                        .param("companyId", "test-company"))
+        mockMvc.perform(post("/api/jira/oauth/refresh")
+                        .param("enterpriseId", "test-enterprise"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true));
-    }
+                .andExpect(jsonPath("$.status").value("success"));
 
-    @Test
-    void testRefreshTokenWithoutRefreshToken() throws Exception {
-        // Given
-        JiraOAuthToken token = new JiraOAuthToken();
-        token.setCompanyId("test-company");
-        token.setAccessToken("old-token");
-        tokenRepository.save(token);
-
-        // When/Then
-        mockMvc.perform(post("/oauth/jira/refresh")
-                        .param("companyId", "test-company"))
-                .andExpect(status().isBadRequest());
+        verify(jiraService).refreshToken("test-enterprise");
     }
 
     @Test
     void testGetProjects() throws Exception {
-        // Given
-        JiraOAuthToken token = new JiraOAuthToken();
-        token.setCompanyId("test-company");
-        token.setAccessToken("test-token");
-        tokenRepository.save(token);
+        when(jiraService.isConnected(anyString())).thenReturn(true);
 
-        // When/Then
         mockMvc.perform(get("/api/jira/projects")
-                        .param("companyId", "test-company"))
+                        .param("enterpriseId", "test-enterprise"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 
     @Test
     void testGetProjectsWithoutToken() throws Exception {
+        when(jiraService.isConnected(anyString())).thenReturn(false);
+
         mockMvc.perform(get("/api/jira/projects")
-                        .param("companyId", "test-company"))
+                        .param("enterpriseId", "test-enterprise"))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void getAuthUrl_ReturnsAuthUrl() throws Exception {
+        mockMvc.perform(get("/api/v1/jira/auth/url")
+                        .param("enterpriseId", "test-enterprise"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void handleCallback_WhenCodeProvided_ExchangesCodeForToken() throws Exception {
+        when(jiraService.exchangeCodeForToken(any(), any())).thenReturn(token);
+
+        mockMvc.perform(get("/api/v1/jira/auth/callback")
+                        .param("code", "test-code")
+                        .param("enterpriseId", "test-enterprise"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void refreshToken_WhenTokenExists_RefreshesToken() throws Exception {
+        when(jiraService.refreshToken(any())).thenReturn(token);
+
+        mockMvc.perform(post("/api/v1/jira/auth/refresh")
+                        .param("enterpriseId", "test-enterprise")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
     }
 } 

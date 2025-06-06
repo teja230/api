@@ -2,18 +2,23 @@ package com.enterprise.agents.common.service;
 
 import com.enterprise.agents.common.model.CompanyConfig;
 import com.enterprise.agents.common.repository.CompanyConfigRepository;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class CompanyConfigService {
     private final CompanyConfigRepository configRepository;
+
+    // Inject self-reference for proper cacheable method invocation
+    @Autowired
+    @Lazy
+    private CompanyConfigService self;
 
     public CompanyConfigService(CompanyConfigRepository configRepository) {
         this.configRepository = configRepository;
@@ -37,6 +42,8 @@ public class CompanyConfigService {
             config.getSettings().put(key, value);
             configRepository.save(config);
         });
+        // Call cacheable method via self-reference
+        self.getConfig(companyId);
     }
 
     @Transactional

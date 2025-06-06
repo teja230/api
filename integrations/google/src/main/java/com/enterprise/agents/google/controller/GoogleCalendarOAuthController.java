@@ -7,6 +7,7 @@ import com.enterprise.agents.common.util.OAuthUtils;
 import com.enterprise.agents.google.model.GoogleCalendarOAuthToken;
 import com.enterprise.agents.google.service.GoogleCalendarService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +21,7 @@ import java.util.Map;
 @RequestMapping("/api/google/calendar")
 @RequiredArgsConstructor
 public class GoogleCalendarOAuthController {
-    private final OAuthConfig oauthConfig;
+    private final @Qualifier("googleCalendarConfig") OAuthConfig oauthConfig;
     private final RestTemplate restTemplate;
     private final GoogleCalendarService calendarService;
 

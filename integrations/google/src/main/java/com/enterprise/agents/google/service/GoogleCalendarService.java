@@ -2,9 +2,12 @@ package com.enterprise.agents.google.service;
 
 import com.enterprise.agents.common.exception.OAuthException;
 import com.enterprise.agents.google.model.GoogleCalendarOAuthToken;
+import com.enterprise.agents.google.repository.GoogleCalendarOAuthTokenRepository;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
@@ -26,6 +29,8 @@ import java.util.stream.Collectors;
 public class GoogleCalendarService {
     private final GoogleCalendarOAuthTokenRepository tokenRepository;
     private final RestTemplate restTemplate;
+
+    private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
 
     public void saveToken(GoogleCalendarOAuthToken token) {
         tokenRepository.save(token);
@@ -57,9 +62,11 @@ public class GoogleCalendarService {
             String calendarId = token.getCalendarId() != null ? token.getCalendarId() : "primary";
 
             Instant now = Instant.now();
+            DateTime timeMin = new DateTime(now.toString());
+            DateTime timeMax = new DateTime(now.plus(7, ChronoUnit.DAYS).toString());
             Events events = service.events().list(calendarId)
-                    .setTimeMin(now.toString())
-                    .setTimeMax(now.plus(7, ChronoUnit.DAYS).toString())
+                    .setTimeMin(timeMin)
+                    .setTimeMax(timeMax)
                     .setOrderBy("startTime")
                     .setSingleEvents(true)
                     .execute();
@@ -75,12 +82,12 @@ public class GoogleCalendarService {
     }
 
     private Calendar getCalendarService(GoogleCalendarOAuthToken token) throws GeneralSecurityException, IOException {
-        Credential credential = new Credential(BearerToken.authorizationHeaderAccessMethod())
+        Credential credential = new Credential(com.google.api.client.auth.oauth2.BearerToken.authorizationHeaderAccessMethod())
                 .setAccessToken(token.getAccessToken());
 
         return new Calendar.Builder(
                 GoogleNetHttpTransport.newTrustedTransport(),
-                JacksonFactory.getDefaultInstance(),
+                JSON_FACTORY,
                 credential)
                 .setApplicationName("Enterprise Agents")
                 .build();

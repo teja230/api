@@ -190,13 +190,21 @@ class SlackServiceTest {
         token.setAccessToken("test-token");
         tokenRepository.save(token);
 
+        // Mock successful API response
+        when(restTemplate.exchange(
+                eq("https://slack.com/api/conversations.list"),
+                eq(org.springframework.http.HttpMethod.GET),
+                any(),
+                eq(String.class)
+        )).thenReturn(new ResponseEntity<>("{\"ok\":true,\"channels\":[{\"id\":\"C123\",\"name\":\"general\"}]}", HttpStatus.OK));
+
         // When
         var channels = slackService.getChannels(companyId);
 
         // Then
         assertNotNull(channels);
         assertFalse(channels.isEmpty());
-        assertEquals("general", channels.get(0).getName());
+        assertEquals("general", channels.get(0));
     }
 
     @Test

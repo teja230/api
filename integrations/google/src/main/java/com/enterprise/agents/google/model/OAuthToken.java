@@ -7,13 +7,14 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Data
-@Entity(name = "GoogleCalendarOAuthToken")
-@Table(name = "google_calendar_oauth_tokens")
 @EqualsAndHashCode(callSuper = true)
-public class GoogleCalendarOAuthToken extends BaseOAuthToken {
+@Entity
+@Table(name = "google_oauth_tokens")
+public class OAuthToken extends BaseOAuthToken {
+    private String calendarId;
     private String email;
     private String name;
     private String picture;
+    private String locale;
     private String timezone;
-    private String calendarId;
 } 
