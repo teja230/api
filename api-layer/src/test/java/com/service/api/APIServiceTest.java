@@ -7,26 +7,23 @@ import org.mockito.Mockito;
 
 import java.io.IOException;
 
-import static org.mockito.ArgumentMatchers.any;
-
 class APIServiceTest {
     @Test
     void run_shouldCallHttpHelper() {
         try (MockedStatic<HttpHelper> mocked = Mockito.mockStatic(HttpHelper.class)) {
             APIService service = new APIService();
             service.run();
-            mocked.verify(() -> HttpHelper.sendHttpRequest(any(), any()));
+            mocked.verify(() -> HttpHelper.sendHttpRequest(Mockito.anyString(), Mockito.anyString()));
         }
     }
 
     @Test
     void run_shouldHandleIOException() {
         try (MockedStatic<HttpHelper> mocked = Mockito.mockStatic(HttpHelper.class)) {
-            mocked.when(() -> HttpHelper.sendHttpRequest(any(), any())).thenThrow(new IOException("fail"));
+            mocked.when(() -> HttpHelper.sendHttpRequest(Mockito.anyString(), Mockito.anyString())).thenThrow(new IOException("fail"));
             APIService service = new APIService();
             service.run();
             // No exception should be thrown
         }
     }
 }
-

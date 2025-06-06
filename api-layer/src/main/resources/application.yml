@@ -18,6 +18,16 @@ slack:
   webhook:
     url: "https://hooks.slack.com/services/your/webhook/url"
   oauth:
+    client-id: "your-client-id"
+    client-secret: "your-client-secret"
+    redirect-uri: "http://localhost:8080/api/slack/oauth/callback"
+    scopes: "user.profile,channels:read,chat:write"
+    token-expiration-seconds: 3600
+
+openai:
+  api:
+    key: "your-openai-api-key"
+    url: "https://api.openai.com/v1/chat/completions"
 
 redis:
   host: localhost

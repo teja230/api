@@ -1,198 +1,188 @@
-/* Add Google Fonts for a modern look */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+/* Modern CSS styles for Onboarding Buddy */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --primary-color: #4A154B;
+  --secondary-color: #2eb67d;
+  --background-color: #f4f1f8;
+  --card-background: #ffffff;
+  --text-primary: #2c3e50;
+  --text-secondary: #6c757d;
+  --success-color: #2eb67d;
+  --error-color: #e01e5a;
+  --border-radius: 16px;
+  --transition-speed: 0.3s;
+}
 
 body {
-  background: linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%);
-  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
   margin: 0;
-  min-height: 100vh;
-  color: #23272f;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--background-color);
+  color: var(--text-primary);
 }
 
-.main-container {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(120deg, #f5f7fa 0%, #c3cfe2 100%);
+/* Dark mode styles */
+[data-theme="dark"] {
+  --background-color: #121212;
+  --card-background: #1e1e1e;
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0a0;
 }
 
-.card {
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 8px 32px rgba(60, 60, 120, 0.12);
-  padding: 40px 36px 32px 36px;
-  min-width: 350px;
-  max-width: 420px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transition: box-shadow 0.2s;
-}
-.card:hover {
-  box-shadow: 0 12px 36px rgba(60, 60, 120, 0.18);
+/* Card animations */
+.card-hover {
+  transition: transform var(--transition-speed) ease-in-out,
+              box-shadow var(--transition-speed) ease-in-out,
+              background-color var(--transition-speed) ease-in-out;
 }
 
-.title {
-  font-size: 2rem;
+.card-hover:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Button styles */
+.gradient-button {
+  background: linear-gradient(45deg, #2196F3 30%, #21CBF3 90%);
+  box-shadow: 0 3px 5px 2px rgba(33, 203, 243, .3);
+  transition: all var(--transition-speed) ease-in-out;
+}
+
+.gradient-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px 2px rgba(33, 203, 243, .4);
+}
+
+/* Chip styles */
+.feature-chip {
+  font-size: 0.75rem;
+  height: 24px;
+  border-radius: 12px;
+  background-color: rgba(74, 21, 75, 0.08);
+  color: var(--primary-color);
+  transition: all var(--transition-speed) ease-in-out;
+}
+
+.feature-chip:hover {
+  background-color: rgba(74, 21, 75, 0.12);
+  transform: scale(1.05);
+}
+
+/* Fade animations */
+.fade-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.fade-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity var(--transition-speed) ease-out,
+              transform var(--transition-speed) ease-out;
+}
+
+/* Loading spinner */
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Alert styles */
+.alert-success {
+  background-color: rgba(46, 182, 125, 0.1);
+  border-color: var(--success-color);
+  color: var(--success-color);
+}
+
+.alert-error {
+  background-color: rgba(224, 30, 90, 0.1);
+  border-color: var(--error-color);
+  color: var(--error-color);
+}
+
+/* Responsive grid */
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  padding: 24px;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
-  color: #4A154B;
-  margin-bottom: 18px;
-  letter-spacing: -1px;
-  text-align: center;
-  background: linear-gradient(90deg, #4A154B 40%, #611f69 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
 }
 
-.status-card {
-  margin-bottom: 18px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.status-connected {
-  color: #2eb67d;
-  font-weight: 600;
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 6px;
-  background: #e6f9f0;
-}
-.status-disconnected {
-  color: #e01e5a;
-  font-weight: 600;
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 6px;
-  background: #fbeaec;
-}
-.status-loading {
-  color: #aaa;
-  font-weight: 500;
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 6px;
-  background: #f3f3f7;
+p {
+  color: var(--text-secondary);
+  line-height: 1.6;
 }
 
-.slack-btn {
-  background: linear-gradient(90deg, #4A154B 60%, #611f69 100%);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 14px 32px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin: 18px 0 24px 0;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(76, 21, 75, 0.08);
-  display: flex;
-  align-items: center;
-  transition: background 0.2s;
-  letter-spacing: 0.5px;
-  gap: 8px;
-  outline: none;
-}
-.slack-btn:hover {
-  background: linear-gradient(90deg, #611f69 60%, #4A154B 100%);
-}
-.slack-btn:active {
-  transform: scale(0.98);
-}
-.slack-icon {
-  display: inline-block;
-  width: 22px;
-  height: 22px;
-  margin-right: 10px;
-  background: url('https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/slack.svg') no-repeat center/contain;
-  vertical-align: middle;
-  filter: drop-shadow(0 1px 2px rgba(76, 21, 75, 0.10));
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-.teams-list {
-  width: 100%;
-  margin-top: 24px;
-}
-.teams-list h3 {
-  font-size: 1.1rem;
-  color: #4A154B;
-  margin-bottom: 10px;
-  font-weight: 600;
-}
-.team-item {
-  background: #f6f6fa;
-  border-radius: 6px;
-  padding: 8px 14px;
-  margin-bottom: 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 1rem;
-  color: #333;
-  box-shadow: 0 1px 3px rgba(76, 21, 75, 0.04);
-  transition: background 0.2s, box-shadow 0.2s;
-}
-.team-item:hover {
-  background: #e0e7ef;
-  box-shadow: 0 2px 8px rgba(60, 60, 120, 0.10);
-}
-.team-name {
-  font-weight: 500;
-}
-.team-id {
-  color: #aaa;
-  font-size: 0.95em;
+::-webkit-scrollbar-track {
+  background: var(--background-color);
 }
 
-.success-page {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 80px;
-  min-height: 60vh;
-}
-.success-card {
-  background: #e6f9f0;
-  border-radius: 12px;
-  padding: 32px 40px;
-  box-shadow: 0 4px 16px rgba(46, 182, 125, 0.08);
-  color: #2eb67d;
-  font-size: 1.3rem;
-  font-weight: 600;
-  text-align: center;
-  border: 1.5px solid #e0e7ef;
-  background: linear-gradient(90deg, #e6f9f0 60%, #c3f5e2 100%);
-}
-.fail-card {
-  background: #fbeaec;
-  border-radius: 12px;
-  padding: 32px 40px;
-  box-shadow: 0 4px 16px rgba(224, 30, 90, 0.08);
-  color: #e01e5a;
-  font-size: 1.3rem;
-  font-weight: 600;
-  text-align: center;
-  border: 1.5px solid #e0e7ef;
-  background: linear-gradient(90deg, #fbeaec 60%, #f9d6e2 100%);
-}
-.fail-msg {
-  color: #e01e5a;
-  font-size: 1.1rem;
-  margin-top: 10px;
-  font-weight: 500;
+::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 4px;
 }
 
-/* Responsive design */
+::-webkit-scrollbar-thumb:hover {
+  background: var(--secondary-color);
+}
+
+/* Utility classes */
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-left { text-align: left; }
+
+.mt-1 { margin-top: 0.25rem; }
+.mt-2 { margin-top: 0.5rem; }
+.mt-3 { margin-top: 1rem; }
+.mt-4 { margin-top: 1.5rem; }
+.mt-5 { margin-top: 3rem; }
+
+.mb-1 { margin-bottom: 0.25rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-3 { margin-bottom: 1rem; }
+.mb-4 { margin-bottom: 1.5rem; }
+.mb-5 { margin-bottom: 3rem; }
+
+/* Responsive breakpoints */
 @media (max-width: 600px) {
-  .card {
-    padding: 24px 8px 18px 8px;
-    min-width: unset;
-    max-width: 98vw;
+  .grid-container {
+    grid-template-columns: 1fr;
+    padding: 16px;
   }
-  .success-card, .fail-card {
-    padding: 18px 8px;
+  
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.25rem; }
+}
+
+@media (min-width: 601px) and (max-width: 960px) {
+  .grid-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 961px) {
+  .grid-container {
+    grid-template-columns: repeat(3, 1fr);
   }
 }

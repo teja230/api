@@ -2,23 +2,160 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation, Link } from 'react-router-dom';
 import './modern.css';
 import {
-  AppBar, Toolbar, Typography, Button, Card, Box, CircularProgress, Alert, List, ListItem, ListItemText, Container, Stack
+  AppBar, Toolbar, Typography, Button, Card, Box, CircularProgress, Alert, List, ListItem, ListItemText, Container, Stack,
+  IconButton, useTheme, ThemeProvider, createTheme, CssBaseline, Tooltip, Chip, Fade, Dialog, DialogTitle, DialogContent,
+  DialogActions, TextField, Select, MenuItem, FormControl, InputLabel, Grid, Avatar, Divider
 } from '@mui/material';
-import { CheckCircle, Error as ErrorIcon, Home as HomeIcon, Group as GroupIcon, InsertComment as SlackIcon, Assignment as JiraIcon } from '@mui/icons-material';
+import {
+  CheckCircle, Error as ErrorIcon, Home as HomeIcon, Group as GroupIcon, InsertComment as SlackIcon,
+  Assignment as JiraIcon, Brightness4, Brightness7, GitHub as GitHubIcon, CalendarMonth as CalendarIcon,
+  Security as SecurityIcon, Cloud as CloudIcon, Email as EmailIcon, Storage as StorageIcon,
+  Business as BusinessIcon, Settings as SettingsIcon
+} from '@mui/icons-material';
+import SlackIntegration from './integrations/SlackIntegration';
+import JiraIntegration from './integrations/JiraIntegration';
+import GitHubIntegration from './integrations/GitHubIntegration';
+import GoogleCalendarIntegration from './integrations/GoogleCalendarIntegration';
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
 }
 
-function MenuBar() {
-  // Print React version for debugging
-  console.log('React version:', React.version);
+function EnterpriseConfigDialog({ open, onClose, onSave, config }) {
+  const [formData, setFormData] = useState(config || {
+    enterpriseId: '',
+    enterpriseName: '',
+    jiraBaseUrl: '',
+    slackWorkspaceId: '',
+    githubOrgId: '',
+    googleWorkspaceId: '',
+    onboardingTemplateId: '',
+    logoUrl: '',
+    primaryColor: '#4A154B',
+    secondaryColor: '#2eb67d'
+  });
+
+  const handleChange = (field) => (event) => {
+    setFormData({ ...formData, [field]: event.target.value });
+  };
+
+  const handleSubmit = () => {
+    onSave(formData);
+    onClose();
+  };
+
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+      <DialogTitle>Enterprise Configuration</DialogTitle>
+      <DialogContent>
+        <Grid container spacing={3} sx={{ mt: 1 }}>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Enterprise ID"
+              value={formData.enterpriseId}
+              onChange={handleChange('enterpriseId')}
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Enterprise Name"
+              value={formData.enterpriseName}
+              onChange={handleChange('enterpriseName')}
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Logo URL"
+              value={formData.logoUrl}
+              onChange={handleChange('logoUrl')}
+              margin="normal"
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Primary Color"
+              value={formData.primaryColor}
+              onChange={handleChange('primaryColor')}
+              margin="normal"
+              type="color"
+            />
+            <TextField
+              fullWidth
+              label="Secondary Color"
+              value={formData.secondaryColor}
+              onChange={handleChange('secondaryColor')}
+              margin="normal"
+              type="color"
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <Divider sx={{ my: 2 }} />
+            <Typography variant="h6" gutterBottom>Integration Settings</Typography>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="JIRA Base URL"
+              value={formData.jiraBaseUrl}
+              onChange={handleChange('jiraBaseUrl')}
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Slack Workspace ID"
+              value={formData.slackWorkspaceId}
+              onChange={handleChange('slackWorkspaceId')}
+              margin="normal"
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="GitHub Organization ID"
+              value={formData.githubOrgId}
+              onChange={handleChange('githubOrgId')}
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Google Workspace ID"
+              value={formData.googleWorkspaceId}
+              onChange={handleChange('googleWorkspaceId')}
+              margin="normal"
+            />
+          </Grid>
+        </Grid>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={handleSubmit} variant="contained" color="primary">
+          Save Configuration
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
+function MenuBar({ enterpriseConfig, onConfigClick }) {
+  const theme = useTheme();
+  const [darkMode, setDarkMode] = useState(false);
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
+
   return (
     <AppBar position="static" color="default" elevation={2} sx={{ mb: 4 }}>
       <Toolbar>
-        <SlackIcon sx={{ color: '#4A154B', mr: 1 }} />
+        {enterpriseConfig?.logoUrl ? (
+          <Avatar src={enterpriseConfig.logoUrl} sx={{ mr: 1 }} />
+        ) : (
+          <BusinessIcon sx={{ color: theme.palette.primary.main, mr: 1 }} />
+        )}
         <Typography variant="h6" color="primary" sx={{ flexGrow: 1, fontWeight: 700 }}>
-          Onboarding Buddy
+          {enterpriseConfig?.enterpriseName || 'Onboarding Buddy'}
         </Typography>
         <Button component={Link} to="/" color="primary" startIcon={<HomeIcon />} sx={{ fontWeight: 600 }}>
           Home
@@ -26,6 +163,12 @@ function MenuBar() {
         <Button component={Link} to="/teams" color="primary" startIcon={<GroupIcon />} sx={{ fontWeight: 600 }}>
           Teams
         </Button>
+        <IconButton onClick={onConfigClick} color="inherit" sx={{ ml: 1 }}>
+          <SettingsIcon />
+        </IconButton>
+        <IconButton onClick={toggleDarkMode} color="inherit" sx={{ ml: 1 }}>
+          {darkMode ? <Brightness7 /> : <Brightness4 />}
+        </IconButton>
       </Toolbar>
     </AppBar>
   );
@@ -86,7 +229,7 @@ function SuccessPage() {
   );
 }
 
-function TeamsList() {
+function TeamsList({ enterpriseConfig }) {
   const [teams, setTeams] = useState([]);
   const [error, setError] = useState(null);
 
@@ -121,110 +264,18 @@ function TeamsList() {
   );
 }
 
-function IntegrationsList() {
-  // Example integrations, can be extended
-  const integrations = [
-    {
-      name: 'Slack',
-      description: 'Connect your Slack workspace for onboarding notifications.',
-      icon: <SlackIcon sx={{ color: '#4A154B', fontSize: 40 }} />,
-      image: 'https://a.slack-edge.com/80588/marketing/img/icons/icon_slack_hash_colored.png',
-      connected: true, // Replace with real status if available
-      connectUrl: '/api/slack/oauth/url',
-    },
-    {
-      name: 'JIRA',
-      description: 'Integrate with JIRA to sync onboarding tasks.',
-      icon: <JiraIcon sx={{ color: '#0052CC', fontSize: 40 }} />,
-      image: 'https://wac-cdn.atlassian.com/dam/jcr:813202b6-6b8e-4b7e-8e6e-6b3b3b3b3b3b/jira.png',
-      connected: false, // Replace with real status if available
-      connectUrl: '#', // Replace with real URL
-    },
-    {
-      name: 'Workday',
-      description: 'Automate HR onboarding workflows with Workday integration.',
-      icon: null,
-      image: 'https://upload.wikimedia.org/wikipedia/commons/4/4d/Workday_Logo.png',
-      connected: false,
-      connectUrl: '#',
-    },
-    {
-      name: 'BambooHR',
-      description: 'Sync employee data and onboarding tasks with BambooHR.',
-      icon: null,
-      image: 'https://cdn.bamboohr.com/images/icons/favicon-96x96.png',
-      connected: false,
-      connectUrl: '#',
-    },
-    {
-      name: 'Google Workspace',
-      description: 'Provision accounts and manage onboarding with Google Workspace.',
-      icon: null,
-      image: 'https://ssl.gstatic.com/docs/doclist/images/mediatype/icon_1_document_x32.png',
-      connected: false,
-      connectUrl: '#',
-    },
-    {
-      name: 'Okta',
-      description: 'Automate user provisioning and SSO onboarding with Okta.',
-      icon: null,
-      image: 'https://www.okta.com/sites/default/files/Okta_Logo_BrightBlue_Medium-thumbnail.png',
-      connected: false,
-      connectUrl: '#',
-    },
-  ];
-
+function IntegrationsList({ enterpriseConfig }) {
   return (
-    <Stack spacing={3}>
-      <Box sx={{
-        display: 'grid',
-        gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
-        gap: 3,
-      }}>
-        {integrations.map((integration) => (
-          <Card
-            key={integration.name}
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              p: 2.5,
-              borderRadius: 3,
-              boxShadow: 3,
-              bgcolor: '#faf9fb',
-              minHeight: 120,
-              transition: 'transform 0.18s, box-shadow 0.18s',
-              cursor: 'pointer',
-              '&:hover': {
-                transform: 'translateY(-4px) scale(1.025)',
-                boxShadow: 8,
-                bgcolor: '#f5f0fa',
-              },
-            }}
-          >
-            <Box sx={{ mr: 2, minWidth: 56, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {integration.image ? (
-                <img src={integration.image} alt={integration.name} style={{ width: 48, height: 48, objectFit: 'contain', borderRadius: 8, background: '#fff' }} />
-              ) : (
-                integration.icon
-              )}
-            </Box>
-            <Box sx={{ flexGrow: 1 }}>
-              <Typography variant="h6" fontWeight={700} color="primary.main">{integration.name}</Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{integration.description}</Typography>
-              {integration.connected ? (
-                <Alert icon={<CheckCircle fontSize="inherit" />} severity="success" sx={{ width: 'fit-content', p: 0.5, fontSize: 14 }}>Connected</Alert>
-              ) : (
-                <Button variant="contained" size="small" href={integration.connectUrl} sx={{ mt: 1, fontWeight: 600 }}>Connect</Button>
-              )}
-            </Box>
-          </Card>
-        ))}
-      </Box>
-    </Stack>
+    <Box>
+      <SlackIntegration enterpriseConfig={enterpriseConfig} />
+      <JiraIntegration enterpriseConfig={enterpriseConfig} />
+      <GitHubIntegration enterpriseConfig={enterpriseConfig} />
+      <GoogleCalendarIntegration enterpriseConfig={enterpriseConfig} />
+    </Box>
   );
 }
 
-function Home() {
+function Home({ enterpriseConfig }) {
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f4f1f8', display: 'flex', alignItems: 'center', justifyContent: 'center', py: 6 }}>
       <Container maxWidth="md">
@@ -246,36 +297,85 @@ function Home() {
               </Typography>
             </Box>
           </Box>
-          <IntegrationsList />
+          <IntegrationsList enterpriseConfig={enterpriseConfig} />
         </Card>
       </Container>
     </Box>
   );
 }
 
-function TeamsPage() {
+function TeamsPage({ enterpriseConfig }) {
   return (
     <Container maxWidth="sm" sx={{ mt: 6 }}>
       <Card sx={{ p: 4, width: '100%', boxShadow: 6, borderRadius: 3 }}>
         <Typography variant="h5" fontWeight={700} color="primary" gutterBottom>
           Slack Teams
         </Typography>
-        <TeamsList />
+        <TeamsList enterpriseConfig={enterpriseConfig} />
       </Card>
     </Container>
   );
 }
 
 function App() {
+  const [darkMode, setDarkMode] = useState(false);
+  const [enterpriseConfig, setEnterpriseConfig] = useState(null);
+  const [configDialogOpen, setConfigDialogOpen] = useState(false);
+
+  const theme = createTheme({
+    palette: {
+      mode: darkMode ? 'dark' : 'light',
+      primary: {
+        main: enterpriseConfig?.primaryColor || '#4A154B',
+      },
+      secondary: {
+        main: enterpriseConfig?.secondaryColor || '#2eb67d',
+      },
+      background: {
+        default: darkMode ? '#121212' : '#f4f1f8',
+        paper: darkMode ? '#1e1e1e' : '#ffffff',
+      },
+    },
+    typography: {
+      fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    },
+    components: {
+      MuiCard: {
+        styleOverrides: {
+          root: {
+            borderRadius: 16,
+          },
+        },
+      },
+    },
+  });
+
+  const handleConfigSave = (config) => {
+    setEnterpriseConfig(config);
+    // Here you would typically save the config to your backend
+  };
+
   return (
-    <Router>
-      <MenuBar />
-      <Routes>
-        <Route path="/success" element={<SuccessPage />} />
-        <Route path="/teams" element={<TeamsPage />} />
-        <Route path="/" element={<Home />} />
-      </Routes>
-    </Router>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Router>
+        <MenuBar 
+          enterpriseConfig={enterpriseConfig} 
+          onConfigClick={() => setConfigDialogOpen(true)} 
+        />
+        <Routes>
+          <Route path="/" element={<Home enterpriseConfig={enterpriseConfig} />} />
+          <Route path="/teams" element={<TeamsPage enterpriseConfig={enterpriseConfig} />} />
+          <Route path="/success" element={<SuccessPage />} />
+        </Routes>
+        <EnterpriseConfigDialog
+          open={configDialogOpen}
+          onClose={() => setConfigDialogOpen(false)}
+          onSave={handleConfigSave}
+          config={enterpriseConfig}
+        />
+      </Router>
+    </ThemeProvider>
   );
 }
 

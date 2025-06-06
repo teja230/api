@@ -24,6 +24,7 @@ import static com.service.api.helpers.Constants.LogCodes.INFO_1654;
 
 public class HttpHelper {
     private static final Logger logger = LoggerFactory.getLogger(HttpHelper.class);
+    private static final Gson gson = new GsonBuilder().create();
 
     private HttpHelper() {
         throw new IllegalStateException("HttpHelper should be used as a utility class");
@@ -44,6 +45,7 @@ public class HttpHelper {
             httpURLConnection.setReadTimeout(connectionTimeout);
         } catch (Exception exception) {
             logger.error("[{}][{}][{}] Exception in buildHttpURLConnection", appId, API_SERVICE, INFO_1652, exception);
+            throw new IllegalArgumentException("Invalid URL: " + url, exception);
         }
         return httpURLConnection;
     }
@@ -176,5 +178,17 @@ public class HttpHelper {
         } catch (URISyntaxException e) {
             throw new IOException("Invalid URL syntax: " + url, e);
         }
+    }
+
+    /**
+     * Send HTTP request with a simpler interface
+     */
+    public static String sendHttpRequest(String url, String payload) throws IOException {
+        HttpURLConnection connection = buildHttpURLConnection(url, "POST", "application/json", true, "default");
+        if (connection == null) {
+            throw new IOException("Failed to create HTTP connection");
+        }
+        JsonElement response = sendHttpRequest(payload, connection, "default");
+        return response.toString();
     }
 }
