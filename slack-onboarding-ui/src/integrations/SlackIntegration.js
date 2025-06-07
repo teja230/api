@@ -229,4 +229,4 @@ const SlackIntegration = ({ enterpriseConfig }) => {
   );
 };
 
-export default SlackIntegration; 
+export default SlackIntegration;

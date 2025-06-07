@@ -66,10 +66,10 @@ OAuth tokens. It is designed to facilitate secure service integrations and token
 
 Each integration service runs on its own port:
 
-- Jira: 8080
-- GitHub: 8082
-- Google Calendar: 8083
-- Slack: 8084
+- GitHub: 8081
+- Google Calendar: 8082
+- Slack: 8083
+- Jira: 8084
 
 1. **Start Jira Integration**
    ```sh
@@ -107,28 +107,44 @@ Each integration service runs on its own port:
 
 ## Key Endpoints
 
-### Jira Integration (Port 8080)
-
-- `/api/jira/oauth/url` - Get Jira OAuth URL
-- `/api/jira/oauth/callback` - Jira OAuth callback
-- `/api/jira/status` - Check Jira integration status
-
-### GitHub Integration (Port 8082)
+### GitHub Integration (Port 8081)
 
 - `/api/github/oauth/url` - Get GitHub OAuth URL
 - `/api/github/oauth/callback` - GitHub OAuth callback
 - `/api/github/status` - Check GitHub integration status
 
-### Google Calendar Integration (Port 8083)
+### Google Calendar Integration (Port 8082)
 
 - `/api/google/calendar/oauth/url` - Get Google Calendar OAuth URL
 - `/api/google/calendar/oauth/callback` - Google Calendar OAuth callback
 - `/api/google/calendar/status` - Check Google Calendar integration status
 
-### Slack Integration (Port 8084)
+### Slack Integration (Port 8083)
 - `/api/slack/oauth/url` - Get Slack OAuth URL
 - `/api/slack/oauth/callback` - Slack OAuth callback
 - `/api/slack/status` - Check Slack integration status
+
+### Jira Integration (Port 8084)
+
+- `/api/jira/oauth/url` - Get Jira OAuth URL
+- `/api/jira/oauth/callback` - Jira OAuth callback
+- `/api/jira/status` - Check Jira integration status
+
+## Nginx Reverse Proxy Setup
+
+To simplify API access and avoid CORS issues, you can use Nginx as a reverse proxy for all integration services. An
+example configuration is provided in the `nginx.conf` file at the project root.
+
+### How to Use
+
+1. Install Nginx if not already installed (e.g., `brew install nginx` on macOS).
+2. Use the provided `nginx.conf` in your project root as the configuration file. You can run Nginx with this config:
+   ```sh
+   nginx -c /path/to/your/project/nginx.conf
+   ```
+3. Access all APIs via `http://localhost:8080/api/{service}/...`.
+
+This setup will forward requests to the correct backend service based on the path.
 
 ## Development Notes
 
@@ -163,3 +179,4 @@ Each integration service runs on its own port:
     - Check redirect URIs match exactly
     - Ensure callback URLs are accessible
 
+---

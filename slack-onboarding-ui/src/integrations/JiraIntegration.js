@@ -340,4 +340,4 @@ const JiraIntegration = ({ enterpriseConfig }) => {
   );
 };
 
-export default JiraIntegration; 
+export default JiraIntegration;

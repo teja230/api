@@ -456,4 +456,4 @@ const GitHubIntegration = ({ enterpriseConfig }) => {
   );
 };
 
-export default GitHubIntegration; 
+export default GitHubIntegration;

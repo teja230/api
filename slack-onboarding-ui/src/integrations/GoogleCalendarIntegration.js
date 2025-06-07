@@ -492,4 +492,4 @@ const GoogleCalendarIntegration = ({ enterpriseConfig }) => {
   );
 };
 
-export default GoogleCalendarIntegration; 
+export default GoogleCalendarIntegration;
