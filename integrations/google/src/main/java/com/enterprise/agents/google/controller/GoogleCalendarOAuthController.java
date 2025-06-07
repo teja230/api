@@ -6,6 +6,7 @@ import com.enterprise.agents.common.model.ApiResponse;
 import com.enterprise.agents.common.util.OAuthUtils;
 import com.enterprise.agents.google.model.GoogleCalendarOAuthToken;
 import com.enterprise.agents.google.service.GoogleCalendarService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -18,15 +19,24 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/google/calendar")
+@RequestMapping("/api/google")
 @RequiredArgsConstructor
 public class GoogleCalendarOAuthController {
-    private final @Qualifier("googleCalendarConfig") OAuthConfig oauthConfig;
+    private final @Qualifier("googleConfig") OAuthConfig oauthConfig;
     private final RestTemplate restTemplate;
     private final GoogleCalendarService calendarService;
 
     @GetMapping("/oauth/url")
-    public ResponseEntity<ApiResponse<String>> getOAuthUrl(@RequestParam String enterpriseId) {
+    public ResponseEntity<ApiResponse<String>> getOAuthUrl(
+            @RequestParam String enterpriseId,
+            HttpSession session) {
+        // Check if user is authenticated via SSO
+        Object user = session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(401)
+                    .body(ApiResponse.error("Not authenticated via SSO"));
+        }
+
         String state = enterpriseId;
         String url = OAuthUtils.buildAuthorizationUrl(oauthConfig, state);
         return ResponseEntity.ok(ApiResponse.success(url));
@@ -35,7 +45,15 @@ public class GoogleCalendarOAuthController {
     @GetMapping("/oauth/callback")
     public ResponseEntity<ApiResponse<Map<String, Object>>> handleCallback(
             @RequestParam String code,
-            @RequestParam String state) {
+            @RequestParam String state,
+            HttpSession session) {
+        // Verify SSO session
+        Object user = session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(401)
+                    .body(ApiResponse.error("Not authenticated via SSO"));
+        }
+
         try {
             var request = OAuthUtils.buildTokenRequest(oauthConfig, code);
             var response = restTemplate.postForEntity(
@@ -71,7 +89,16 @@ public class GoogleCalendarOAuthController {
     }
 
     @GetMapping("/status")
-    public ResponseEntity<ApiResponse<Boolean>> checkStatus(@RequestParam String enterpriseId) {
+    public ResponseEntity<ApiResponse<Boolean>> checkStatus(
+            @RequestParam String enterpriseId,
+            HttpSession session) {
+        // Verify SSO session
+        Object user = session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(401)
+                    .body(ApiResponse.error("Not authenticated via SSO"));
+        }
+
         boolean isConnected = calendarService.isConnected(enterpriseId);
         return ResponseEntity.ok(ApiResponse.success(isConnected));
     }

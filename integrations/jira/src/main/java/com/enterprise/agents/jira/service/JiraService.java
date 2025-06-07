@@ -1,14 +1,14 @@
 package com.enterprise.agents.jira.service;
 
+import com.enterprise.agents.common.config.OAuthConfig;
 import com.enterprise.agents.common.exception.OAuthException;
+import com.enterprise.agents.common.util.OAuthUtils;
 import com.enterprise.agents.jira.model.JiraOAuthToken;
 import com.enterprise.agents.jira.repository.JiraOAuthTokenRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -17,15 +17,73 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class JiraService {
+    private final OAuthConfig oAuthConfig;
     private final JiraOAuthTokenRepository tokenRepository;
     private final RestTemplate restTemplate;
 
-    public void saveToken(JiraOAuthToken token) {
-        tokenRepository.save(token);
+    public JiraOAuthToken exchangeCodeForToken(String code, String state) {
+        try {
+            String enterpriseId = OAuthUtils.extractEnterpriseId(state);
+            MultiValueMap<String, String> request = OAuthUtils.buildTokenRequest(
+                    code,
+                    oAuthConfig.getJiraClientId(),
+                    oAuthConfig.getJiraClientSecret(),
+                    oAuthConfig.getJiraRedirectUri()
+            );
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+            HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(request, headers);
+            Map<String, Object> response = restTemplate.postForObject(
+                    oAuthConfig.getJiraTokenUrl(),
+                    entity,
+                    Map.class
+            );
+
+            if (response == null || !response.containsKey("access_token")) {
+                throw new OAuthException("Failed to exchange code for token", "No access token in response");
+            }
+
+            JiraOAuthToken token = new JiraOAuthToken();
+            token.setAccessToken((String) response.get("access_token"));
+            token.setRefreshToken((String) response.get("refresh_token"));
+            token.setExpiresIn((Integer) response.get("expires_in"));
+            token.setEnterpriseId(enterpriseId);
+
+            return saveToken(token);
+        } catch (Exception e) {
+            throw new OAuthException("Failed to exchange code for token", e);
+        }
+    }
+
+    public Map<String, Object> getUserInfo(String accessToken) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<?> entity = new HttpEntity<>(headers);
+            return restTemplate.getForObject(
+                    oAuthConfig.getJiraApiUrl() + "/rest/api/3/myself",
+                    Map.class,
+                    entity
+            );
+        } catch (Exception e) {
+            throw new OAuthException("Failed to get user info", e);
+        }
+    }
+
+    public JiraOAuthToken saveToken(JiraOAuthToken token) {
+        return tokenRepository.save(token);
     }
 
     public boolean isConnected(String enterpriseId) {
-        return tokenRepository.findByEnterpriseId(enterpriseId).isPresent();
+        return tokenRepository.findByEnterpriseId(enterpriseId) != null;
+    }
+
+    public void disconnect(String enterpriseId) {
+        tokenRepository.deleteByEnterpriseId(enterpriseId);
     }
 
     public Map<String, Object> getProjects(String enterpriseId) {
@@ -219,11 +277,6 @@ public class JiraService {
         } catch (Exception e) {
             throw new OAuthException("api_error", e.getMessage(), e);
         }
-    }
-
-    public JiraOAuthToken exchangeCodeForToken(String code, String enterpriseId) {
-        // Implementation for OAuth token exchange
-        return null; // TODO: Implement OAuth token exchange
     }
 
     public JiraOAuthToken refreshToken(String enterpriseId) {

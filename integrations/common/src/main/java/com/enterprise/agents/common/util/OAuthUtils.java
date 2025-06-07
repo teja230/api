@@ -1,9 +1,11 @@
 package com.enterprise.agents.common.util;
 
 import com.enterprise.agents.common.config.OAuthConfig;
+import com.enterprise.agents.common.exception.OAuthException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.util.Base64Utils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -47,5 +49,32 @@ public class OAuthUtils {
         body.add("grant_type", "refresh_token");
 
         return new HttpEntity<>(body, headers);
+    }
+
+    public static String buildOAuthUrl(String authUrl, String clientId, String redirectUri, String scope, String state) {
+        try {
+            return String.format("%s?client_id=%s&redirect_uri=%s&scope=%s&state=%s",
+                    authUrl, clientId, redirectUri, scope, state);
+        } catch (Exception e) {
+            throw new OAuthException("Failed to build OAuth URL", e);
+        }
+    }
+
+    public static String extractEnterpriseId(String state) {
+        try {
+            return new String(Base64Utils.decodeFromString(state));
+        } catch (Exception e) {
+            throw new OAuthException("Failed to extract enterprise ID from state", e);
+        }
+    }
+
+    public static MultiValueMap<String, String> buildTokenRequest(String code, String clientId, String clientSecret, String redirectUri) {
+        MultiValueMap<String, String> request = new LinkedMultiValueMap<>();
+        request.add("code", code);
+        request.add("client_id", clientId);
+        request.add("client_secret", clientSecret);
+        request.add("redirect_uri", redirectUri);
+        request.add("grant_type", "authorization_code");
+        return request;
     }
 } 

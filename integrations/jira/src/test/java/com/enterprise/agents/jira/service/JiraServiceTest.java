@@ -1,5 +1,6 @@
 package com.enterprise.agents.jira.service;
 
+import com.enterprise.agents.common.config.OAuthConfig;
 import com.enterprise.agents.common.exception.OAuthException;
 import com.enterprise.agents.jira.model.JiraOAuthToken;
 import com.enterprise.agents.jira.repository.JiraOAuthTokenRepository;
@@ -22,6 +23,8 @@ class JiraServiceTest {
 
     @Mock
     private JiraOAuthTokenRepository tokenRepository;
+    @Mock
+    private OAuthConfig oAuthConfig;
 
     private JiraService jiraService;
     private RestTemplate restTemplate;
@@ -29,7 +32,7 @@ class JiraServiceTest {
     @BeforeEach
     void setUp() {
         restTemplate = new RestTemplate();
-        jiraService = new JiraService(tokenRepository, restTemplate);
+        jiraService = new JiraService(oAuthConfig, tokenRepository, restTemplate);
     }
 
     @Test

@@ -6,6 +6,7 @@ import com.enterprise.agents.common.model.ApiResponse;
 import com.enterprise.agents.common.util.OAuthUtils;
 import com.enterprise.agents.github.model.GitHubOAuthToken;
 import com.enterprise.agents.github.service.GitHubService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,16 @@ public class GitHubOAuthController {
     private final GitHubService githubService;
 
     @GetMapping("/oauth/url")
-    public ResponseEntity<ApiResponse<String>> getOAuthUrl(@RequestParam String enterpriseId) {
+    public ResponseEntity<ApiResponse<String>> getOAuthUrl(
+            @RequestParam String enterpriseId,
+            HttpSession session) {
+        // Check if user is authenticated via SSO
+        Object user = session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(401)
+                    .body(ApiResponse.error("Not authenticated via SSO"));
+        }
+
         String state = enterpriseId;
         String url = OAuthUtils.buildAuthorizationUrl(oauthConfig, state);
         return ResponseEntity.ok(ApiResponse.success(url));
@@ -36,7 +46,15 @@ public class GitHubOAuthController {
     @GetMapping("/oauth/callback")
     public ResponseEntity<ApiResponse<Map<String, Object>>> handleCallback(
             @RequestParam String code,
-            @RequestParam String state) {
+            @RequestParam String state,
+            HttpSession session) {
+        // Verify SSO session
+        Object user = session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(401)
+                    .body(ApiResponse.error("Not authenticated via SSO"));
+        }
+
         try {
             var request = OAuthUtils.buildTokenRequest(oauthConfig, code);
             var response = restTemplate.postForEntity(
@@ -71,13 +89,31 @@ public class GitHubOAuthController {
     }
 
     @GetMapping("/status")
-    public ResponseEntity<ApiResponse<Boolean>> checkStatus(@RequestParam String enterpriseId) {
+    public ResponseEntity<ApiResponse<Boolean>> checkStatus(
+            @RequestParam String enterpriseId,
+            HttpSession session) {
+        // Verify SSO session
+        Object user = session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(401)
+                    .body(ApiResponse.error("Not authenticated via SSO"));
+        }
+
         boolean isConnected = githubService.isConnected(enterpriseId);
         return ResponseEntity.ok(ApiResponse.success(isConnected));
     }
 
     @GetMapping("/repositories")
-    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getRepositories(@RequestParam String enterpriseId) {
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getRepositories(
+            @RequestParam String enterpriseId,
+            HttpSession session) {
+        // Verify SSO session
+        Object user = session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(401)
+                    .body(ApiResponse.error("Not authenticated via SSO"));
+        }
+
         var repos = githubService.getRepositories(enterpriseId);
         return ResponseEntity.ok(ApiResponse.success(repos));
     }

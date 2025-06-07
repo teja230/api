@@ -1,8 +1,16 @@
 package com.enterprise.agents.common.exception;
 
 public class OAuthException extends RuntimeException {
-    private final String error;
-    private final String errorDescription;
+    private String error;
+    private String errorDescription;
+
+    public OAuthException(String message) {
+        super(message);
+    }
+
+    public OAuthException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
     public OAuthException(String error, String errorDescription) {
         super(errorDescription);

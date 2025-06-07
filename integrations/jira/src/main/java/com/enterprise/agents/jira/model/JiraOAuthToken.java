@@ -7,21 +7,30 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "jira_oauth_tokens")
+@EqualsAndHashCode(callSuper = true)
 public class JiraOAuthToken extends BaseOAuthToken {
-    private String siteUrl;
-    private String cloudId;
     private String accountId;
-    private String accountType;
-    private String accountStatus;
+    private String email;
     private String name;
     private String picture;
-    private String emailAddress;
-    private String timeZone;
-    private String locale;
-    private String groups;
-    private String applicationRoles;
-    private String expand;
+    private String siteUrl;
+    private Integer expiresIn;
+
+    public String getSiteUrl() {
+        return siteUrl;
+    }
+
+    public void setSiteUrl(String siteUrl) {
+        this.siteUrl = siteUrl;
+    }
+
+    public Integer getExpiresIn() {
+        return expiresIn;
+    }
+
+    public void setExpiresIn(Integer expiresIn) {
+        this.expiresIn = expiresIn;
+    }
 }
