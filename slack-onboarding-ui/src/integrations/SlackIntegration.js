@@ -1,232 +1,169 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Card, CardContent, Typography, Box, Button, List, ListItem, ListItemText,
-  ListItemIcon, Chip, IconButton, Dialog, DialogTitle, DialogContent,
-  DialogActions, TextField, CircularProgress, Alert, Tooltip
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Box,
+  Alert,
+  CircularProgress,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  Divider
 } from '@mui/material';
 import {
   InsertComment as SlackIcon,
-  CheckCircle, Error as ErrorIcon, Add as AddIcon,
-  Settings as SettingsIcon, Refresh as RefreshIcon
+  CheckCircle,
+  Error as ErrorIcon,
+  Refresh as RefreshIcon
 } from '@mui/icons-material';
 
-const SlackIntegration = ({ enterpriseConfig }) => {
-  const [status, setStatus] = useState('disconnected');
-  const [channels, setChannels] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [settings, setSettings] = useState({
-    defaultChannel: '',
-    welcomeMessage: '',
-    autoInvite: true,
-    notifyOnJoin: true
-  });
+function SlackIntegration() {
+  const [status, setStatus] = useState({ loading: true, connected: false, error: null });
+  const [teams, setTeams] = useState([]);
+  const [loadingTeams, setLoadingTeams] = useState(false);
+
+  const fetchStatus = async () => {
+    try {
+      const response = await fetch('/api/slack/status');
+      const data = await response.json();
+      setStatus({ loading: false, connected: data.connected, error: null });
+    } catch (error) {
+      setStatus({ loading: false, connected: false, error: 'Failed to fetch Slack status' });
+    }
+  };
+
+  const fetchTeams = async () => {
+    setLoadingTeams(true);
+    try {
+      const response = await fetch('/api/slack/teams');
+      const data = await response.json();
+      setTeams(data);
+    } catch (error) {
+      console.error('Failed to fetch teams:', error);
+    } finally {
+      setLoadingTeams(false);
+    }
+  };
 
   useEffect(() => {
-    checkStatus();
-    if (status === 'connected') {
-      fetchChannels();
-    }
-  }, [status]);
+    fetchStatus();
+  }, []);
 
-  const checkStatus = async () => {
+  const handleConnect = async () => {
     try {
-      const response = await fetch(`/api/slack/status?enterpriseId=${enterpriseConfig?.enterpriseId}`);
+      const response = await fetch('/api/slack/oauth/url');
       const data = await response.json();
-      setStatus(data.connected ? 'connected' : 'disconnected');
-    } catch (err) {
-      setError('Failed to check Slack connection status');
+      window.location.href = data.url;
+    } catch (error) {
+      setStatus(prev => ({ ...prev, error: 'Failed to initiate Slack connection' }));
     }
-  };
-
-  const fetchChannels = async () => {
-    try {
-      const response = await fetch(`/api/slack/channels?enterpriseId=${enterpriseConfig?.enterpriseId}`);
-      const data = await response.json();
-      setChannels(data.channels);
-    } catch (err) {
-      setError('Failed to fetch Slack channels');
-    }
-  };
-
-  const handleConnect = () => {
-    window.location.href = `/api/slack/oauth/url?enterpriseId=${enterpriseConfig?.enterpriseId}`;
   };
 
   const handleDisconnect = async () => {
     try {
-      await fetch(`/api/slack/disconnect?enterpriseId=${enterpriseConfig?.enterpriseId}`, {
-        method: 'POST'
-      });
-      setStatus('disconnected');
-      setChannels([]);
-    } catch (err) {
-      setError('Failed to disconnect Slack');
+      await fetch('/api/slack/disconnect', { method: 'POST' });
+      setStatus({ loading: false, connected: false, error: null });
+      setTeams([]);
+    } catch (error) {
+      setStatus(prev => ({ ...prev, error: 'Failed to disconnect Slack' }));
     }
   };
 
-  const handleSettingsSave = async () => {
-    try {
-      await fetch(`/api/slack/settings?enterpriseId=${enterpriseConfig?.enterpriseId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(settings)
-      });
-      setSettingsOpen(false);
-    } catch (err) {
-      setError('Failed to save Slack settings');
-    }
+  const handleRefreshTeams = () => {
+    fetchTeams();
   };
 
   return (
     <Card sx={{ mb: 3 }}>
       <CardContent>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <SlackIcon sx={{ color: '#4A154B', fontSize: 40, mr: 2 }} />
-          <Box sx={{ flexGrow: 1 }}>
-            <Typography variant="h6" component="div">
-              Slack Integration
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Manage team communication and notifications
-            </Typography>
-          </Box>
-          <Box>
-            {status === 'connected' ? (
-              <>
-                <Tooltip title="Settings">
-                  <IconButton onClick={() => setSettingsOpen(true)}>
-                    <SettingsIcon />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="Refresh">
-                  <IconButton onClick={fetchChannels}>
-                    <RefreshIcon />
-                  </IconButton>
-                </Tooltip>
-                <Button
-                  variant="outlined"
-                  color="error"
-                  onClick={handleDisconnect}
-                  sx={{ ml: 1 }}
-                >
-                  Disconnect
-                </Button>
-              </>
-            ) : (
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleConnect}
-                startIcon={<SlackIcon />}
-              >
-                Connect Slack
-              </Button>
-            )}
-          </Box>
+        <Box display="flex" alignItems="center" mb={2}>
+          <SlackIcon color="primary" sx={{ mr: 1 }} />
+          <Typography variant="h6" component="div">
+            Slack Integration
+          </Typography>
         </Box>
 
-        {error && (
+        {status.error && (
           <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
+            {status.error}
           </Alert>
         )}
 
-        {status === 'connected' && (
+        <Box mb={3}>
+          <Typography variant="body1" gutterBottom>
+            Status: {status.loading ? (
+              <CircularProgress size={16} sx={{ ml: 1 }} />
+            ) : status.connected ? (
+              <span style={{ color: '#2eb67d' }}>
+                <CheckCircle fontSize="small" sx={{ verticalAlign: 'middle', mr: 0.5 }} />
+                Connected
+              </span>
+            ) : (
+              <span style={{ color: '#e01e5a' }}>
+                <ErrorIcon fontSize="small" sx={{ verticalAlign: 'middle', mr: 0.5 }} />
+                Not Connected
+              </span>
+            )}
+          </Typography>
+        </Box>
+
+        {status.connected ? (
           <>
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="subtitle1" gutterBottom>
-                Connected Channels
-              </Typography>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={handleRefreshTeams}
+              disabled={loadingTeams}
+              startIcon={loadingTeams ? <CircularProgress size={20} /> : <RefreshIcon />}
+              sx={{ mb: 2 }}
+            >
+              Refresh Teams
+            </Button>
+
+            {teams.length > 0 && (
               <List>
-                {channels.map((channel) => (
-                  <ListItem key={channel.id}>
-                    <ListItemIcon>
-                      <SlackIcon />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={channel.name}
-                      secondary={`${channel.memberCount} members`}
-                    />
-                    <Chip
-                      label={channel.isPrivate ? 'Private' : 'Public'}
-                      size="small"
-                      color={channel.isPrivate ? 'default' : 'primary'}
-                    />
-                  </ListItem>
+                {teams.map((team, index) => (
+                  <React.Fragment key={team.id}>
+                    {index > 0 && <Divider />}
+                    <ListItem>
+                      <ListItemIcon>
+                        <SlackIcon color="primary" />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={team.name}
+                        secondary={`Team ID: ${team.id}`}
+                      />
+                    </ListItem>
+                  </React.Fragment>
                 ))}
               </List>
-            </Box>
+            )}
 
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Button
-                variant="outlined"
-                startIcon={<AddIcon />}
-                onClick={() => {/* Handle create channel */}}
-              >
-                Create Channel
-              </Button>
-              <Button
-                variant="outlined"
-                onClick={() => {/* Handle invite members */}}
-              >
-                Invite Members
-              </Button>
-            </Box>
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={handleDisconnect}
+              sx={{ mt: 2 }}
+            >
+              Disconnect Slack
+            </Button>
           </>
+        ) : (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleConnect}
+            disabled={status.loading}
+          >
+            Connect Slack
+          </Button>
         )}
       </CardContent>
-
-      <Dialog open={settingsOpen} onClose={() => setSettingsOpen(false)}>
-        <DialogTitle>Slack Integration Settings</DialogTitle>
-        <DialogContent>
-          <TextField
-            fullWidth
-            label="Default Channel"
-            value={settings.defaultChannel}
-            onChange={(e) => setSettings({ ...settings, defaultChannel: e.target.value })}
-            margin="normal"
-          />
-          <TextField
-            fullWidth
-            label="Welcome Message"
-            value={settings.welcomeMessage}
-            onChange={(e) => setSettings({ ...settings, welcomeMessage: e.target.value })}
-            margin="normal"
-            multiline
-            rows={4}
-          />
-          <Box sx={{ mt: 2 }}>
-            <Typography variant="subtitle2" gutterBottom>
-              Automation Settings
-            </Typography>
-            <Button
-              variant={settings.autoInvite ? 'contained' : 'outlined'}
-              onClick={() => setSettings({ ...settings, autoInvite: !settings.autoInvite })}
-              sx={{ mr: 1 }}
-            >
-              Auto Invite
-            </Button>
-            <Button
-              variant={settings.notifyOnJoin ? 'contained' : 'outlined'}
-              onClick={() => setSettings({ ...settings, notifyOnJoin: !settings.notifyOnJoin })}
-            >
-              Notify on Join
-            </Button>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setSettingsOpen(false)}>Cancel</Button>
-          <Button onClick={handleSettingsSave} variant="contained">
-            Save Settings
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Card>
   );
-};
+}
 
 export default SlackIntegration;

@@ -12,7 +12,7 @@ OAuth tokens. It is designed to facilitate secure service integrations and token
     - `google/`: Google Calendar integration service
     - `jira/`: Jira integration service
     - `slack/`: Slack integration service
-- `ui/`: Frontend UI application (React)
+- `slack-onboarding-ui/`: Frontend UI application (React)
 
 ## Prerequisites
 
@@ -20,6 +20,7 @@ OAuth tokens. It is designed to facilitate secure service integrations and token
 - Maven 3.6+
 - Node.js 18+ (for UI)
 - Redis (for token storage)
+- Nginx (for reverse proxy)
 
 ## Setup
 
@@ -71,26 +72,28 @@ Each integration service runs on its own port:
 - Slack: 8083
 - Jira: 8084
 
-1. **Start Jira Integration**
+1. **Start all services at once**
    ```sh
+   cd /path/to/project
+   mvn spring-boot:run -pl integrations/slack & mvn spring-boot:run -pl integrations/github & mvn spring-boot:run -pl integrations/jira & mvn spring-boot:run -pl integrations/google
+   ```
+
+   Or start them individually:
+
+   ```sh
+   # Start Jira Integration
    cd integrations/jira
    mvn spring-boot:run
-   ```
 
-2. **Start GitHub Integration**
-   ```sh
+   # Start GitHub Integration
    cd integrations/github
    mvn spring-boot:run
-   ```
 
-3. **Start Google Calendar Integration**
-   ```sh
+   # Start Google Calendar Integration
    cd integrations/google
    mvn spring-boot:run
-   ```
 
-4. **Start Slack Integration**
-   ```sh
+   # Start Slack Integration
    cd integrations/slack
    mvn spring-boot:run
    ```
@@ -99,11 +102,46 @@ Each integration service runs on its own port:
 
 1. Install dependencies and run the UI:
    ```sh
-   cd ui
+   cd slack-onboarding-ui
    npm install
    npm start
    ```
    The UI will be available at `http://localhost:3000`.
+
+### Nginx Reverse Proxy
+
+1. Start Nginx with the provided configuration:
+   ```sh
+   sudo nginx -c /path/to/project/nginx.conf
+   ```
+
+2. To reload Nginx configuration after changes:
+   ```sh
+   sudo nginx -s reload
+   ```
+
+## Service Health Monitoring
+
+The application includes a health check dashboard that monitors the status of all integration services. The health check
+endpoints are:
+
+- API Layer: `http://localhost:8080/health/api`
+- Slack: `http://localhost:8080/health/slack`
+- GitHub: `http://localhost:8080/health/github`
+- Jira: `http://localhost:8080/health/jira`
+- Google: `http://localhost:8080/health/google`
+
+Each service exposes a Spring Boot Actuator health endpoint at `/actuator/health` that returns the service status.
+
+### Health Check UI
+
+The health check dashboard is available at `http://localhost:3000/health` after logging in. It provides:
+
+- Real-time status of all services
+- Last checked timestamp
+- Service details and uptime
+- Manual refresh option
+- Auto-refresh every 30 seconds
 
 ## Key Endpoints
 
@@ -112,39 +150,71 @@ Each integration service runs on its own port:
 - `/api/github/oauth/url` - Get GitHub OAuth URL
 - `/api/github/oauth/callback` - GitHub OAuth callback
 - `/api/github/status` - Check GitHub integration status
+- `/actuator/health` - Service health check
 
 ### Google Calendar Integration (Port 8082)
 
 - `/api/google/calendar/oauth/url` - Get Google Calendar OAuth URL
 - `/api/google/calendar/oauth/callback` - Google Calendar OAuth callback
 - `/api/google/calendar/status` - Check Google Calendar integration status
+- `/actuator/health` - Service health check
 
 ### Slack Integration (Port 8083)
 - `/api/slack/oauth/url` - Get Slack OAuth URL
 - `/api/slack/oauth/callback` - Slack OAuth callback
 - `/api/slack/status` - Check Slack integration status
+- `/actuator/health` - Service health check
 
 ### Jira Integration (Port 8084)
 
 - `/api/jira/oauth/url` - Get Jira OAuth URL
 - `/api/jira/oauth/callback` - Jira OAuth callback
 - `/api/jira/status` - Check Jira integration status
+- `/actuator/health` - Service health check
 
 ## Nginx Reverse Proxy Setup
 
-To simplify API access and avoid CORS issues, you can use Nginx as a reverse proxy for all integration services. An
-example configuration is provided in the `nginx.conf` file at the project root.
+The `nginx.conf` file in the project root configures Nginx as a reverse proxy for all services. It handles:
 
-### How to Use
+- Health check endpoint routing
+- API endpoint routing
+- CORS configuration
+- Request forwarding to appropriate services
 
-1. Install Nginx if not already installed (e.g., `brew install nginx` on macOS).
-2. Use the provided `nginx.conf` in your project root as the configuration file. You can run Nginx with this config:
-   ```sh
-   nginx -c /path/to/your/project/nginx.conf
-   ```
-3. Access all APIs via `http://localhost:8080/api/{service}/...`.
+### Configuration Details
 
-This setup will forward requests to the correct backend service based on the path.
+```nginx
+# Health check endpoints
+location /health/api {
+    proxy_pass http://localhost:8081/actuator/health;
+}
+location /health/slack {
+    proxy_pass http://localhost:8083/actuator/health;
+}
+location /health/github {
+    proxy_pass http://localhost:8081/actuator/health;
+}
+location /health/jira {
+    proxy_pass http://localhost:8084/actuator/health;
+}
+location /health/google {
+    proxy_pass http://localhost:8082/actuator/health;
+}
+
+# API endpoints
+location /api/jira/ {
+    proxy_pass http://localhost:8084/api/jira/;
+}
+location /api/slack/ {
+    proxy_pass http://localhost:8081/api/slack/;
+}
+location /api/github/ {
+    proxy_pass http://localhost:8082/api/github/;
+}
+location /api/google/ {
+    proxy_pass http://localhost:8083/api/google/;
+}
+```
 
 ## Development Notes
 
@@ -173,10 +243,17 @@ This setup will forward requests to the correct backend service based on the pat
     - Verify the port is not blocked
     - Check service logs for errors
     - Ensure all required environment variables are set
+   - Check the health check dashboard for service status
 
 3. **OAuth Issues**
     - Verify OAuth credentials are correct
     - Check redirect URIs match exactly
     - Ensure callback URLs are accessible
+
+4. **Health Check Issues**
+    - Verify all services are running
+    - Check Nginx configuration
+    - Ensure services are accessible on their respective ports
+    - Check service logs for any errors
 
 ---

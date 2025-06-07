@@ -6,7 +6,7 @@ import com.enterprise.agents.common.model.ApiResponse;
 import com.enterprise.agents.common.util.OAuthUtils;
 import com.enterprise.agents.slack.model.SlackOAuthToken;
 import com.enterprise.agents.slack.service.SlackService;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,11 +19,19 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/slack")
-@RequiredArgsConstructor
 public class SlackOAuthController {
-    private final @Qualifier("slackConfig") OAuthConfig oauthConfig;
+    private final OAuthConfig oauthConfig;
     private final RestTemplate restTemplate;
     private final SlackService slackService;
+
+    @Autowired
+    public SlackOAuthController(@Qualifier("slackConfig") OAuthConfig oauthConfig,
+                                RestTemplate restTemplate,
+                                SlackService slackService) {
+        this.oauthConfig = oauthConfig;
+        this.restTemplate = restTemplate;
+        this.slackService = slackService;
+    }
 
     @GetMapping("/oauth/url")
     public ResponseEntity<ApiResponse<String>> getOAuthUrl(@RequestParam String enterpriseId) {
