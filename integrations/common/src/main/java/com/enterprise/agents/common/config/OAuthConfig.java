@@ -35,7 +35,7 @@ public class OAuthConfig {
     }
 
     public String getClientSecret() {
-        return jiraScope;
+        return jiraClientSecret;
     }
 
     public String getRedirectUri() {
