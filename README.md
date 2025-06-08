@@ -186,7 +186,7 @@ The `nginx.conf` file in the project root configures Nginx as a reverse proxy fo
 ```nginx
 # Health check endpoints
 location /health/api {
-    proxy_pass http://localhost:8081/actuator/health;
+    proxy_pass http://localhost:8080/actuator/health;
 }
 location /health/slack {
     proxy_pass http://localhost:8083/actuator/health;
@@ -202,17 +202,20 @@ location /health/google {
 }
 
 # API endpoints
+location /api/sso/ {
+    proxy_pass http://localhost:8080/api/sso/;
+}
 location /api/jira/ {
     proxy_pass http://localhost:8084/api/jira/;
 }
 location /api/slack/ {
-    proxy_pass http://localhost:8081/api/slack/;
+    proxy_pass http://localhost:8083/api/slack/;
 }
 location /api/github/ {
-    proxy_pass http://localhost:8082/api/github/;
+    proxy_pass http://localhost:8081/api/github/;
 }
 location /api/google/ {
-    proxy_pass http://localhost:8083/api/google/;
+    proxy_pass http://localhost:8082/api/google/;
 }
 ```
 
