@@ -40,7 +40,7 @@ public class HttpHelper {
             // Validate that the URL is absolute
             try {
                 new java.net.URL(url);
-            } catch (Exception e) {
+            } catch (MalformedURLException e) {
                 throw new IllegalArgumentException("Invalid URL: " + url, e);
             }
 
