@@ -12,11 +12,11 @@ OAuth tokens. It is designed to facilitate secure service integrations and token
     - `google/`: Google Calendar integration service
     - `jira/`: Jira integration service
     - `slack/`: Slack integration service
-- `slack-onboarding-ui/`: Frontend UI application (React)
+- `ui-app/`: Frontend UI application (React)
 
 ## Prerequisites
 
-- Java 23+
+- Java 17+
 - Maven 3.6+
 - Node.js 18+ (for UI)
 - Redis (for token storage)
@@ -30,7 +30,13 @@ OAuth tokens. It is designed to facilitate secure service integrations and token
    cd <repo-root>
    ```
 
-2. **Configure environment variables**
+2. **Install prerequisites**
+   Run the helper script to install Java, Maven, Node.js, Redis and Nginx on Debian/Ubuntu systems:
+   ```sh
+   ./install-dependencies.sh
+   ```
+
+3. **Configure environment variables**
    For each integration service, configure the respective credentials in their `application.properties` files:
 
     - GitHub (`integrations/github/src/main/resources/application.properties`):
@@ -102,7 +108,7 @@ Each integration service runs on its own port:
 
 1. Install dependencies and run the UI:
    ```sh
-   cd slack-onboarding-ui
+   cd ui-app
    npm install
    npm start
    ```
@@ -214,6 +220,15 @@ location /api/github/ {
 location /api/google/ {
     proxy_pass http://localhost:8082/api/google/;
 }
+```
+
+## Running Tests
+
+Run backend and frontend tests to verify the installation:
+
+```sh
+mvn test
+npm test --prefix ui-app
 ```
 
 ## Development Notes
