@@ -1,4 +1,4 @@
-package com.enterprise.agents.config;
+package com.enterprise;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,19 +19,17 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/sso/login",
-                                "/api/sso/callback",
-                                "/api/sso/logout",
-                                "/api/sso/user",
-                                "/api/sso/error",
-                                "/api/sso/initiate",
-                                "/actuator/health",
-                                "/actuator/health/**",
-                                "/api/system/health",
-                                "/api/system/health/**"
-                        ).permitAll()
+                .authorizeHttpRequests(authz -> authz
+                        .requestMatchers("/api/sso/user").permitAll()
+                        .requestMatchers("/api/sso/initiate").permitAll()
+                        .requestMatchers("/actuator/health").permitAll()
+                        .requestMatchers("/actuator/health/**").permitAll()
+                        .requestMatchers("/api/system/health").permitAll()
+                        .requestMatchers("/api/system/health/**").permitAll()
+                        .requestMatchers("/api/sso/login").permitAll()
+                        .requestMatchers("/api/sso/callback").permitAll()
+                        .requestMatchers("/api/sso/logout").permitAll()
+                        .requestMatchers("/api/sso/error").permitAll()
                         .anyRequest().authenticated()
                 )
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()));
@@ -44,13 +42,21 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
+        configuration.setAllowedHeaders(Arrays.asList(
+                "Authorization",
+                "Content-Type",
+                "Accept",
+                "Origin",
+                "X-Requested-With",
+                "Access-Control-Request-Method",
+                "Access-Control-Request-Headers"
+        ));
         configuration.setExposedHeaders(Arrays.asList("Authorization"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-} 
+}

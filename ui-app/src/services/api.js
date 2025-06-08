@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8080'; // API Layer base URL
+export const API_BASE_URL = 'http://localhost:8085/api';
 
 // Integration Services
 const INTEGRATION_SERVICES = {
@@ -11,13 +11,13 @@ const INTEGRATION_SERVICES = {
 // Teams API
 export const teamsApi = {
   getTeams: async () => {
-    const response = await fetch(`${API_BASE_URL}/api/teams`);
+    const response = await fetch(`${API_BASE_URL}/teams`);
     if (!response.ok) throw new Error('Failed to fetch teams');
     return response.json();
   },
 
   createTeam: async (teamData) => {
-    const response = await fetch(`${API_BASE_URL}/api/teams`, {
+    const response = await fetch(`${API_BASE_URL}/teams`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(teamData)
@@ -27,7 +27,7 @@ export const teamsApi = {
   },
 
   updateTeam: async (teamId, teamData) => {
-    const response = await fetch(`${API_BASE_URL}/api/teams/${teamId}`, {
+    const response = await fetch(`${API_BASE_URL}/teams/${teamId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(teamData)
@@ -128,26 +128,38 @@ export const integrationApi = {
 export const healthApi = {
   checkAllServices: async () => {
     const services = {
-      apiLayer: { url: 'http://localhost:8080/health/api', name: 'API Layer' },
-      slack: { url: 'http://localhost:8080/health/slack', name: 'Slack Integration' },
-      jira: { url: 'http://localhost:8080/health/jira', name: 'Jira Integration' },
-      github: { url: 'http://localhost:8080/health/github', name: 'GitHub Integration' },
-      google: { url: 'http://localhost:8080/health/google', name: 'Google Calendar Integration' }
+      apiLayer: { url: 'http://localhost:8085/actuator/health', name: 'API Layer' },
+      slack: { url: 'http://localhost:8083/actuator/health', name: 'Slack Integration' },
+      jira: { url: 'http://localhost:8084/api/jira/actuator/health', name: 'Jira Integration' },
+      github: { url: 'http://localhost:8081/api/github/actuator/health', name: 'GitHub Integration' },
+      google: { url: 'http://localhost:8082/actuator/health', name: 'Google Calendar Integration' }
     };
 
     const results = await Promise.all(
       Object.entries(services).map(async ([key, service]) => {
         try {
-          const response = await fetch(service.url);
+          const response = await fetch(service.url, {
+            headers: {
+              'Accept': 'application/vnd.spring-boot.actuator.v3+json, application/json'
+            }
+          });
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
           const data = await response.json();
+          const status = data.status === 'UP' ? 'healthy' : 'unhealthy';
+          
           return {
             service: key,
             name: service.name,
-            status: response.ok ? 'healthy' : 'unhealthy',
+            status: status,
             details: data,
             lastChecked: new Date().toISOString()
           };
         } catch (error) {
+          console.error(`Health check failed for ${service.name}:`, error);
           return {
             service: key,
             name: service.name,
@@ -160,5 +172,25 @@ export const healthApi = {
     );
 
     return results;
+  }
+};
+
+export const getSystemHealth = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/system/health`, {
+      credentials: 'include',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch health data');
+    }
+    
+    return response.json();
+  } catch (error) {
+    console.error('Failed to fetch system health:', error);
+    throw error;
   }
 }; 

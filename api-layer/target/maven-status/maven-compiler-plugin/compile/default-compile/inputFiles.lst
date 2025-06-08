@@ -18,3 +18,4 @@
 /Users/teja/IdeaProjects/api/api-layer/src/main/java/com/enterprise/agents/controller/SlackOAuthController.java
 /Users/teja/IdeaProjects/api/api-layer/src/main/java/com/enterprise/agents/service/SlackService.java
 /Users/teja/IdeaProjects/api/api-layer/src/main/java/com/enterprise/agents/controller/CustomErrorController.java
+/Users/teja/IdeaProjects/api/api-layer/src/main/java/com/enterprise/agents/controller/SystemHealthController.java

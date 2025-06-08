@@ -17,6 +17,7 @@ com/service/api/helpers/Constants$LogCodes.class
 com/service/api/helpers/JsonPath.class
 com/service/api/helpers/JsonPath$JsonFieldIterator.class
 com/enterprise/agents/config/ExternalServicesConfig$Slack$Webhook.class
+com/enterprise/agents/controller/SystemHealthController.class
 com/service/api/helpers/HttpHelper.class
 com/enterprise/agents/config/DatabaseConfig.class
 com/enterprise/agents/controller/SlackOAuthController.class

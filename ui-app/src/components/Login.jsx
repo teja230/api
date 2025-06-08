@@ -3,12 +3,19 @@ import { motion } from 'framer-motion';
 import { Button, Container, Typography, Box, CircularProgress, Alert } from '@mui/material';
 import { FaBuilding } from 'react-icons/fa';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { API_BASE_URL } from '../services/api';
 
 const Login = ({ onLogin }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
+  // Helper to get Basic Auth header for test credentials
+  const getAuthHeader = () => {
+    const creds = btoa('testuser:testpass');
+    return { 'Authorization': `Basic ${creds}` };
+  };
 
   // Check for error parameters in URL and authentication status
   useEffect(() => {
@@ -19,10 +26,11 @@ const Login = ({ onLogin }) => {
       // Check if we're authenticated after SSO callback
       const checkAuth = async () => {
         try {
-          const response = await fetch('http://localhost:8080/api/sso/user', {
+          const response = await fetch(`${API_BASE_URL}/sso/user`, {
             credentials: 'include',
             headers: {
-              'Accept': 'application/json'
+              'Accept': 'application/json',
+              ...getAuthHeader()
             }
           });
           
@@ -43,11 +51,12 @@ const Login = ({ onLogin }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('http://localhost:8080/api/sso/initiate', {
+      const response = await fetch(`${API_BASE_URL}/sso/initiate`, {
         method: 'GET',
         credentials: 'include',
         headers: {
-          'Accept': 'application/json'
+          'Accept': 'application/json',
+          ...getAuthHeader()
         }
       });
       
@@ -128,4 +137,4 @@ const Login = ({ onLogin }) => {
   );
 };
 
-export default Login; 
+export default Login;

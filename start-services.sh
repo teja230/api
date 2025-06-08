@@ -36,21 +36,15 @@ get_context_path() {
 # Function to check if a service is healthy
 check_health() {
     local url=$1
-    local context_path=$2
-    local max_retries=$3
+    local max_retries=$2
     local retry_count=0
     local wait_time=5
 
-    # Normalize context path: if empty or '/', use empty string
-    if [[ -z "$context_path" || "$context_path" == "/" ]]; then
-        context_path=""
-    fi
-
-    echo "Checking health for $url$context_path"
+    echo "Checking health for $url"
     
     while [ $retry_count -lt $max_retries ]; do
-        if curl -s "$url$context_path/actuator/health" | grep -q '"status":"UP"'; then
-            echo "Service at $url$context_path is healthy!"
+        if curl -s "$url/actuator/health" | grep -q '"status":"UP"'; then
+            echo "Service at $url is healthy!"
             return 0
         fi
         
@@ -59,7 +53,7 @@ check_health() {
         sleep $wait_time
     done
     
-    echo "Service at $url$context_path failed to become healthy after $max_retries retries"
+    echo "Service at $url failed to become healthy after $max_retries retries"
     return 1
 }
 
@@ -121,11 +115,11 @@ sleep 20
 
 # Check health of each service
 echo "Checking service health..."
-check_health "http://localhost:$API_PORT" "$API_CONTEXT" 12 || exit 1
-check_health "http://localhost:$GITHUB_PORT" "$GITHUB_CONTEXT" 12 || exit 1
-check_health "http://localhost:$GOOGLE_PORT" "$GOOGLE_CONTEXT" 12 || exit 1
-check_health "http://localhost:$SLACK_PORT" "$SLACK_CONTEXT" 12 || exit 1
-check_health "http://localhost:$JIRA_PORT" "$JIRA_CONTEXT" 12 || exit 1
+check_health "http://localhost:$API_PORT" 12 || exit 1
+check_health "http://localhost:$GITHUB_PORT" 12 || exit 1
+check_health "http://localhost:$GOOGLE_PORT" 12 || exit 1
+check_health "http://localhost:$SLACK_PORT" 12 || exit 1
+check_health "http://localhost:$JIRA_PORT" 12 || exit 1
 
 echo "All services are up and running!"
 

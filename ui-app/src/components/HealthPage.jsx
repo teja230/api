@@ -1,110 +1,130 @@
-import React, { useState } from 'react';
-import { Container, Typography, Grid, Card, CardContent, Button, Box, Chip } from '@mui/material';
-import { FaCheck, FaTimes, FaSync } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Chip,
+  IconButton,
+  CircularProgress,
+  Alert
+} from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import { getSystemHealth } from '../services/api';
 
 const HealthPage = () => {
-  const [services] = useState([
-    {
-      id: 'api',
-      name: 'API Service',
-      status: 'healthy',
-      uptime: '99.9%',
-      lastChecked: '2 minutes ago'
-    },
-    {
-      id: 'slack',
-      name: 'Slack Integration',
-      status: 'healthy',
-      uptime: '99.8%',
-      lastChecked: '1 minute ago'
-    },
-    {
-      id: 'github',
-      name: 'GitHub Integration',
-      status: 'healthy',
-      uptime: '99.9%',
-      lastChecked: '2 minutes ago'
-    },
-    {
-      id: 'jira',
-      name: 'Jira Integration',
-      status: 'degraded',
-      uptime: '98.5%',
-      lastChecked: '3 minutes ago'
-    },
-    {
-      id: 'google',
-      name: 'Google Calendar Integration',
-      status: 'healthy',
-      uptime: '99.7%',
-      lastChecked: '1 minute ago'
-    }
-  ]);
+  const [services, setServices] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'healthy':
-        return 'success';
-      case 'degraded':
-        return 'warning';
-      case 'unhealthy':
-        return 'error';
-      default:
-        return 'default';
+  const fetchHealthData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await getSystemHealth();
+      if (response && response.services) {
+        setServices(response.services);
+      } else {
+        setError('Invalid health data format received');
+      }
+    } catch (err) {
+      setError('Failed to fetch health data. Please try again.');
+      console.error('Health check error:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchHealthData();
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchHealthData, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const getServiceName = (serviceId) => {
+    const names = {
+      'api-layer': 'API Service',
+      'github': 'GitHub Integration',
+      'slack': 'Slack Integration',
+      'jira': 'Jira Integration',
+      'google-calendar': 'Google Calendar Integration'
+    };
+    return names[serviceId] || serviceId;
+  };
+
+  const formatLastChecked = (timestamp) => {
+    if (!timestamp) return 'Never';
+    const date = new Date(timestamp);
+    return date.toLocaleString();
+  };
+
+  const getStatusColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'healthy':
+        return 'success';
+      case 'unhealthy':
+        return 'error';
+      default:
+        return 'warning';
+    }
+  };
+
+  if (loading && Object.keys(services).length === 0) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+    <Box p={3}>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h4" component="h1">
           System Health
         </Typography>
-        <Button
-          variant="outlined"
-          startIcon={<FaSync />}
-          onClick={() => {/* TODO: Implement refresh */}}
-        >
-          Refresh
-        </Button>
+        <IconButton onClick={fetchHealthData} disabled={loading}>
+          <RefreshIcon />
+        </IconButton>
       </Box>
 
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+      )}
+
       <Grid container spacing={3}>
-        {services.map((service) => (
-          <Grid item xs={12} md={6} lg={4} key={service.id}>
+        {Object.entries(services).map(([serviceId, data]) => (
+          <Grid item xs={12} sm={6} md={4} key={serviceId}>
             <Card>
               <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Typography variant="h6" component="div">
-                    {service.name}
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                  <Typography variant="h6" component="h2">
+                    {getServiceName(serviceId)}
                   </Typography>
-                  <Box sx={{ ml: 'auto' }}>
-                    <Chip
-                      icon={service.status === 'healthy' ? <FaCheck /> : <FaTimes />}
-                      label={service.status}
-                      color={getStatusColor(service.status)}
-                      size="small"
-                    />
-                  </Box>
+                  <Chip
+                    label={data.status || 'UNKNOWN'}
+                    color={getStatusColor(data.status)}
+                    size="small"
+                  />
                 </Box>
-
-                <Box sx={{ mb: 1 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Uptime: {service.uptime}
+                <Typography color="textSecondary" gutterBottom>
+                  Last Checked: {formatLastChecked(data.lastChecked)}
+                </Typography>
+                {data.error && (
+                  <Typography color="error" variant="body2">
+                    Error: {data.error}
                   </Typography>
-                </Box>
-
-                <Box>
-                  <Typography variant="body2" color="text.secondary">
-                    Last checked: {service.lastChecked}
-                  </Typography>
-                </Box>
+                )}
               </CardContent>
             </Card>
           </Grid>
         ))}
       </Grid>
-    </Container>
+    </Box>
   );
 };
 

@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: github-service
+  main:
+    allow-bean-definition-overriding: true
+  datasource:
+    url: jdbc:h2:mem:githubdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+server:
+  port: 8081
+  servlet:
+    context-path: /api/github
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+github:
+  client:
+    id: ${GITHUB_CLIENT_ID:your-client-id}
+    secret: ${GITHUB_CLIENT_SECRET:your-client-secret}
+  webhook:
+    secret: ${GITHUB_WEBHOOK_SECRET:your-webhook-secret}
+
+logging:
+  level:
+    com.enterprise.agents: DEBUG
+    org.springframework.security: DEBUG 

@@ -51,7 +51,7 @@ function App() {
 
   const checkAuthStatus = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/sso/user', {
+      const response = await fetch('http://localhost:8085/api/sso/user', {
         credentials: 'include',
         headers: {
           'Accept': 'application/json'
@@ -81,7 +81,7 @@ function App() {
 
   const handleLogout = async () => {
     try {
-      await fetch('http://localhost:8080/api/sso/logout', {
+      await fetch('http://localhost:8085/api/sso/logout', {
         method: 'POST',
         credentials: 'include'
       });
