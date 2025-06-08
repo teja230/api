@@ -11,7 +11,7 @@ public final class Constants {
     public static final String GET_REQUEST_METHOD = "GET";
 
     private Constants() {
-        throw new IllegalStateException("HubspotConstants should be used as a utility class");
+        throw new IllegalStateException("Constants should be used as a utility class");
     }
 
     public static final class LogCodes {
