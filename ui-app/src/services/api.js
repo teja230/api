@@ -2,10 +2,10 @@ export const API_BASE_URL = 'http://localhost:8085/api';
 
 // Integration Services
 const INTEGRATION_SERVICES = {
-  slack: { port: 8081, baseUrl: 'http://localhost:8081' },
-  jira: { port: 8082, baseUrl: 'http://localhost:8082' },
-  github: { port: 8083, baseUrl: 'http://localhost:8083' },
-  google: { port: 8084, baseUrl: 'http://localhost:8084' }
+  slack: { port: 8083, baseUrl: 'http://localhost:8083' },
+  jira: { port: 8084, baseUrl: 'http://localhost:8084' },
+  github: { port: 8081, baseUrl: 'http://localhost:8081' },
+  google: { port: 8082, baseUrl: 'http://localhost:8082' }
 };
 
 // Teams API
