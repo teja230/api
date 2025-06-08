@@ -79,7 +79,7 @@ public class JiraService {
     }
 
     public boolean isConnected(String enterpriseId) {
-        return tokenRepository.findByEnterpriseId(enterpriseId) != null;
+        return tokenRepository.findByEnterpriseId(enterpriseId).isPresent();
     }
 
     public void disconnect(String enterpriseId) {
