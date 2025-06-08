@@ -7,6 +7,10 @@
 
 set -e
 
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run this script as root or with sudo." >&2
+  exit 1
+fi
 if ! command -v apt-get >/dev/null; then
   echo "apt-get not found. Please install Java, Maven, Node.js, Redis and Nginx manually." >&2
   exit 1
