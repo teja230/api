@@ -25,8 +25,25 @@ public class JiraIntegrationService extends BaseIntegrationService {
 
     @Override
     protected String exchangeCodeForToken(IntegrationConfiguration config, String code) {
-        // Implement Jira-specific token exchange
-        return null; // TODO: Implement actual token exchange
+        org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED);
+        org.springframework.util.LinkedMultiValueMap<String, String> params = new org.springframework.util.LinkedMultiValueMap<>();
+        params.add("client_id", config.getClientId());
+        params.add("client_secret", config.getClientSecret());
+        params.add("code", code);
+        params.add("grant_type", "authorization_code");
+        params.add("redirect_uri", baseRedirectUri + "/api/jira/oauth/callback");
+
+        org.springframework.http.HttpEntity<org.springframework.util.MultiValueMap<String, String>> request =
+                new org.springframework.http.HttpEntity<>(params, headers);
+        java.util.Map<String, Object> response = restTemplate.postForObject(
+                config.getType().getTokenUrl(), request, java.util.Map.class);
+
+        if (response == null || response.get("access_token") == null) {
+            throw new RuntimeException("Failed to exchange code for JIRA token");
+        }
+        return (String) response.get("access_token");
     }
 
     @Override

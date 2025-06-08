@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main", "work" ]
+  pull_request:
+    branches: [ "main", "work" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Backend tests
+        run: mvn -B test
+      - name: UI tests
+        run: |
+          cd ui-app
+          npm ci
+          npm test --if-present -- --watchAll=false
