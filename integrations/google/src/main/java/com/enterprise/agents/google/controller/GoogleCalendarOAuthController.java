@@ -88,7 +88,7 @@ public class GoogleCalendarOAuthController {
         }
     }
 
-    @GetMapping("/status")
+    @GetMapping("/calendar/status")
     public ResponseEntity<ApiResponse<Boolean>> checkStatus(
             @RequestParam String enterpriseId,
             HttpSession session) {

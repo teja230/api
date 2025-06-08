@@ -1,5 +1,7 @@
 /Users/teja/IdeaProjects/api/api-layer/src/main/java/com/enterprise/agents/config/WebConfig.java
+/Users/teja/IdeaProjects/api/api-layer/src/main/java/com/enterprise/agents/config/ExternalServicesConfig.java
 /Users/teja/IdeaProjects/api/api-layer/src/main/java/com/enterprise/agents/ApiLayerApplication.java
+/Users/teja/IdeaProjects/api/api-layer/src/main/java/com/enterprise/agents/config/DatabaseConfig.java
 /Users/teja/IdeaProjects/api/api-layer/src/main/java/com/service/api/helpers/Constants.java
 /Users/teja/IdeaProjects/api/api-layer/src/main/java/com/enterprise/agents/service/OpenAIService.java
 /Users/teja/IdeaProjects/api/api-layer/src/main/java/com/enterprise/agents/controller/SsoMockController.java
