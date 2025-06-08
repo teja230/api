@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/oauth")
+@RequestMapping("/oauth")
 public abstract class BaseOAuthController {
     protected final IntegrationService integrationService;
     protected final IntegrationLoggingService loggingService;

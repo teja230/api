@@ -59,13 +59,13 @@ const LandingPage = () => {
               Onboarding App
             </Typography>
           </Box>
-          <Typography variant="h5" sx={{ 
+          <Typography variant="h5" sx={{
             mb: 4,
             color: 'rgba(255, 255, 255, 0.9)',
             maxWidth: '800px',
             textAlign: 'center'
           }}>
-            Streamline your team onboarding process with our powerful automation platform
+            Elevate team onboarding with seamless automation and integrations
           </Typography>
           <Button
             variant="contained"
