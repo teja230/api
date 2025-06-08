@@ -37,6 +37,13 @@ public class HttpHelper {
         HttpURLConnection httpURLConnection = null;
         int connectionTimeout = REST_CLIENT_TIMEOUT_MS;
         try {
+            // Validate that the URL is absolute
+            try {
+                new java.net.URL(url);
+            } catch (MalformedURLException e) {
+                throw new IllegalArgumentException("Invalid URL: " + url, e);
+            }
+
             httpURLConnection = createHttpUrlConnection(url);
             httpURLConnection.setDoOutput(doOutput);
             httpURLConnection.setRequestMethod(requestMethod);
