@@ -314,7 +314,12 @@ public class JiraService {
                 existing.setRefreshToken((String) response.get("refresh_token"));
             }
             if (response.containsKey("expires_in")) {
-                existing.setExpiresIn((Integer) response.get("expires_in"));
+                Object expiresInValue = response.get("expires_in");
+                if (expiresInValue instanceof Number) {
+                    existing.setExpiresIn(((Number) expiresInValue).intValue());
+                } else {
+                    throw new OAuthException("invalid_response", "'expires_in' is not a valid number");
+                }
             }
 
             tokenRepository.save(existing);
