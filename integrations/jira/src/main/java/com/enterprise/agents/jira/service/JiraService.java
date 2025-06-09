@@ -280,7 +280,47 @@ public class JiraService {
     }
 
     public JiraOAuthToken refreshToken(String enterpriseId) {
-        // Implementation for token refresh
-        return null; // TODO: Implement token refresh
+        JiraOAuthToken existing = tokenRepository.findByEnterpriseId(enterpriseId)
+                .orElseThrow(() -> new OAuthException("not_connected", "JIRA not connected"));
+
+        if (existing.getRefreshToken() == null || existing.getRefreshToken().isEmpty()) {
+            throw new OAuthException("no_refresh_token", "Refresh token not available");
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        org.springframework.util.LinkedMultiValueMap<String, String> params = new org.springframework.util.LinkedMultiValueMap<>();
+        params.add("client_id", oAuthConfig.getJiraClientId());
+        params.add("client_secret", oAuthConfig.getJiraClientSecret());
+        params.add("refresh_token", existing.getRefreshToken());
+        params.add("grant_type", "refresh_token");
+
+        HttpEntity<org.springframework.util.MultiValueMap<String, String>> entity = new HttpEntity<>(params, headers);
+
+        try {
+            java.util.Map<String, Object> response = restTemplate.postForObject(
+                    oAuthConfig.getJiraTokenUrl(),
+                    entity,
+                    java.util.Map.class
+            );
+
+            if (response == null || !response.containsKey("access_token")) {
+                throw new OAuthException("api_error", "No access token in response");
+            }
+
+            existing.setAccessToken((String) response.get("access_token"));
+            if (response.containsKey("refresh_token")) {
+                existing.setRefreshToken((String) response.get("refresh_token"));
+            }
+            if (response.containsKey("expires_in")) {
+                existing.setExpiresIn((Integer) response.get("expires_in"));
+            }
+
+            tokenRepository.save(existing);
+            return existing;
+        } catch (Exception e) {
+            throw new OAuthException("api_error", e.getMessage(), e);
+        }
     }
 }
