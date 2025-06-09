@@ -231,6 +231,10 @@ mvn test
 npm test --prefix ui-app
 ```
 
+If Maven fails to resolve dependencies because of restricted network access,
+pre-install them or provide an offline repository via the `~/.m2` directory
+before running the tests.
+
 ## Development Notes
 
 - Each service uses an in-memory H2 database for development
@@ -270,5 +274,10 @@ npm test --prefix ui-app
     - Check Nginx configuration
     - Ensure services are accessible on their respective ports
     - Check service logs for any errors
+
+5. **Offline Builds**
+    - If Maven or npm cannot download dependencies, populate a local
+      repository in `~/.m2` and install node packages manually before
+      running builds or tests.
 
 ---
