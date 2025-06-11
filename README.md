@@ -30,6 +30,7 @@ repeatability.
 - Context-aware, multi-step task automation
 - Human-in-the-loop escalation
 - Workflow auditing and traceability
+- Onboarding chat agent that guides new employees through setup and knowledge transfer
 
 **Use Cases:**
 
