@@ -17,9 +17,35 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import { API_BASE_URL } from '../services/api';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
+import GitHubIcon from '@mui/icons-material/GitHub';
+import { FaSlack } from 'react-icons/fa';
+import GoogleIcon from '@mui/icons-material/Google';
+import BugReportIcon from '@mui/icons-material/BugReport';
+import StorageIcon from '@mui/icons-material/Storage';
+import { Avatar } from '@mui/material';
+
+const getServiceIcon = (serviceId) => {
+  const normalizedId = serviceId.toLowerCase().replace(/-/g, '');
+  if (normalizedId.includes('github')) return <GitHubIcon style={{ fontSize: 32 }} />;
+  if (normalizedId.includes('slack')) return <FaSlack style={{ fontSize: 32 }} />;
+  if (normalizedId.includes('google')) return <GoogleIcon style={{ fontSize: 32 }} />;
+  if (normalizedId.includes('jira')) return <BugReportIcon style={{ fontSize: 32 }} />;
+  if (normalizedId.includes('api')) return <StorageIcon style={{ fontSize: 32 }} />;
+  return <StorageIcon style={{ fontSize: 32 }} />;
+};
+
+const getServiceColor = (serviceId) => {
+  const normalizedId = serviceId.toLowerCase().replace(/-/g, '');
+  if (normalizedId.includes('github')) return '#24292e';
+  if (normalizedId.includes('slack')) return '#4A154B';
+  if (normalizedId.includes('google')) return '#4285F4';
+  if (normalizedId.includes('jira')) return '#0052CC';
+  if (normalizedId.includes('api')) return '#1976d2';
+  return 'primary.main';
+};
 
 const HealthPage = () => {
-  const [services, setServices] = useState({});
+  const [health, setHealth] = useState({ status: '', details: {} });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
@@ -28,10 +54,10 @@ const HealthPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(`${API_BASE_URL}/health/aggregate`, { credentials: 'include' });
+      const response = await fetch(`${API_BASE_URL}/api/health/aggregate`, { credentials: 'include' });
       const data = await response.json();
-      if (data && typeof data === 'object') {
-        setServices(data);
+      if (data && typeof data === 'object' && data.details) {
+        setHealth(data);
         setLastUpdated(Date.now());
       } else {
         setError('Invalid health data format received');
@@ -79,7 +105,7 @@ const HealthPage = () => {
     return date.toLocaleString();
   };
 
-  if (loading && Object.keys(services).length === 0) {
+  if (loading && Object.keys(health.details).length === 0) {
     return (
       <Container maxWidth="lg">
         <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
@@ -99,6 +125,20 @@ const HealthPage = () => {
           <Typography variant="subtitle1" color="text.secondary">
             Monitor the status of all system services and integrations
           </Typography>
+          <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+            {getStatusIcon(health.status)}
+            <Chip 
+              label={`Overall: ${health.status || 'UNKNOWN'}`} 
+              color={getStatusColor(health.status)} 
+              size="medium"
+              sx={{ 
+                fontWeight: 'bold',
+                '& .MuiChip-label': {
+                  px: 2
+                }
+              }}
+            />
+          </Box>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           {lastUpdated && (
@@ -143,13 +183,21 @@ const HealthPage = () => {
       )}
 
       <Grid container spacing={3}>
-        {Object.entries(services).map(([serviceId, data]) => (
+        {Object.entries(health.details).map(([serviceId, data]) => (
           <Grid item xs={12} sm={6} md={4} key={serviceId}>
-            <Paper elevation={3}>
+            <Paper 
+              elevation={3}
+              sx={{
+                transition: 'transform 0.2s',
+                '&:hover': {
+                  transform: 'translateY(-4px)'
+                }
+              }}
+            >
               <Card>
                 <CardContent>
                   <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                    <Typography variant="h6" component="h2">
+                    <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold' }}>
                       {serviceId.charAt(0).toUpperCase() + serviceId.slice(1)}
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -158,9 +206,27 @@ const HealthPage = () => {
                         label={data.status || 'UNKNOWN'}
                         color={getStatusColor(data.status)}
                         size="small"
+                        sx={{ 
+                          fontWeight: 'bold',
+                          '& .MuiChip-label': {
+                            px: 2
+                          }
+                        }}
                       />
                     </Box>
                   </Box>
+                  {data.error && (
+                    <Alert severity="error" sx={{ mt: 1 }}>
+                      {data.error}
+                    </Alert>
+                  )}
+                  {data.details && (
+                    <Box sx={{ mt: 2 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Last checked: {formatLastChecked(data.lastChecked)}
+                      </Typography>
+                    </Box>
+                  )}
                 </CardContent>
               </Card>
             </Paper>

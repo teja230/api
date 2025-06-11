@@ -99,20 +99,6 @@ const Dashboard = () => {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      {/* Health summary widget */}
-      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
-        {healthSummary.loading ? (
-          <CircularProgress size={20} />
-        ) : healthSummary.allUp ? (
-          <Chip icon={<CheckCircleIcon color="success" />} label="All systems operational" color="success" />
-        ) : (
-          <Chip icon={<ErrorIcon color="error" />} label="Some services down" color="error" />
-        )}
-        <Button size="small" variant="outlined" onClick={() => window.location.href='/health'}>
-          View Details
-        </Button>
-      </Box>
-
       <Typography variant="h4" component="h1" gutterBottom>
         Welcome to Onboarding Dashboard
       </Typography>

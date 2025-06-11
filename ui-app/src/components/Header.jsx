@@ -13,7 +13,18 @@ const Header = ({ onLogout }) => {
   return (
     <AppBar position="static" color="default" elevation={1}>
       <Toolbar>
-        <Typography variant="h6" color="primary" sx={{ flexGrow: 1 }}>
+        <Typography 
+          variant="h6" 
+          color="primary" 
+          sx={{ 
+            flexGrow: 1,
+            cursor: 'pointer',
+            '&:hover': {
+              opacity: 0.8
+            }
+          }}
+          onClick={() => handleNavigation('/')}
+        >
           Onboarding App
         </Typography>
         <Box sx={{ display: 'flex', gap: 2 }}>

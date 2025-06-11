@@ -90,7 +90,10 @@ function App() {
     if (loading) {
       return <div>Loading...</div>;
     }
-    return isAuthenticated ? <Navigate to="/dashboard" replace /> : children;
+    if (isAuthenticated && window.location.pathname === '/login') {
+      return <Navigate to="/dashboard" replace />;
+    }
+    return children;
   };
 
   if (loading) {
@@ -105,11 +108,7 @@ function App() {
           {/* Public routes */}
           <Route 
             path="/" 
-            element={
-              <PublicRoute>
-                <LandingPage />
-              </PublicRoute>
-            } 
+            element={<LandingPage />}
           />
           <Route 
             path="/login" 
