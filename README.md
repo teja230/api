@@ -60,7 +60,7 @@ permissive open source license. You are free to use the code, modify it, and
 even build paid services on top of it.
 
 If you would like hands-on setup help or a commercial license that supports the
-maintainer, [contact me](mailto:teja230@gmail.com).
+maintainer, [Contact the project maintainer](mailto:teja230@gmail.com).
 
 ## Prerequisites
 
