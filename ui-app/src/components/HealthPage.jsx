@@ -62,12 +62,10 @@ const HealthPage = () => {
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
-      case 'healthy':
+      case 'up':
         return 'success';
-      case 'unhealthy':
-        return 'error';
       default:
-        return 'warning';
+        return 'error';
     }
   };
 

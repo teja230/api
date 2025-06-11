@@ -3,7 +3,10 @@
 ## Goal
 
 This project provides a backend API for integrating various services (Slack, GitHub, Google Calendar, Jira) and managing
-OAuth tokens. It is designed to facilitate secure service integrations and token management for enterprise applications.
+OAuth tokens. It is designed to facilitate secure service integrations and token management for enterprise applications
+to help with Onboarding new employees.
+
+![Onboarding App](img.png)
 
 ## Project Structure
 
@@ -12,6 +15,7 @@ OAuth tokens. It is designed to facilitate secure service integrations and token
     - `google/`: Google Calendar integration service
     - `jira/`: Jira integration service
     - `slack/`: Slack integration service
+- `api-layer/`: API gateway layer (aggregates integration services)
 - `ui-app/`: Frontend UI application (React)
 
 ## Prerequisites
@@ -43,66 +47,54 @@ OAuth tokens. It is designed to facilitate secure service integrations and token
       ```properties
       github.oauth.client-id=<your-client-id>
       github.oauth.client-secret=<your-client-secret>
-      github.oauth.redirect-uri=http://localhost:8082/api/github/oauth/callback
+      github.oauth.redirect-uri=http://localhost:8081/api/github/oauth/callback
       ```
 
     - Google Calendar (`integrations/google/src/main/resources/application.properties`):
       ```properties
       google.oauth.client-id=<your-client-id>
       google.oauth.client-secret=<your-client-secret>
-      google.oauth.redirect-uri=http://localhost:8083/api/google/calendar/oauth/callback
+      google.oauth.redirect-uri=http://localhost:8082/api/google/calendar/oauth/callback
       ```
 
     - Jira (`integrations/jira/src/main/resources/application.properties`):
       ```properties
       jira.oauth.client-id=<your-client-id>
       jira.oauth.client-secret=<your-client-secret>
-      jira.oauth.redirect-uri=http://localhost:8080/api/jira/oauth/callback
+      jira.oauth.redirect-uri=http://localhost:8084/api/jira/oauth/callback
       ```
 
     - Slack (`integrations/slack/src/main/resources/application.properties`):
       ```properties
       slack.oauth.client-id=<your-client-id>
       slack.oauth.client-secret=<your-client-secret>
-      slack.oauth.redirect-uri=http://localhost:8084/api/slack/oauth/callback
+      slack.oauth.redirect-uri=http://localhost:8083/api/slack/oauth/callback
       ```
 
 ## How to Run
 
-### Integration Services
+### Start All Services (Preferred: Microservices)
 
-Each integration service runs on its own port:
+Use the provided script to start all backend services in microservices mode:
 
-- GitHub: 8081
-- Google Calendar: 8082
-- Slack: 8083
-- Jira: 8084
+```sh
+./start-services.sh
+```
 
-1. **Start all services at once**
-   ```sh
-   cd /path/to/project
-   mvn spring-boot:run -pl integrations/slack & mvn spring-boot:run -pl integrations/github & mvn spring-boot:run -pl integrations/jira & mvn spring-boot:run -pl integrations/google
-   ```
+This will start:
 
-   Or start them individually:
+- GitHub Integration (port 8081)
+- Google Calendar Integration (port 8082)
+- Slack Integration (port 8083)
+- Jira Integration (port 8084)
+- API Layer (port 8085)
 
-   ```sh
-   # Start Jira Integration
-   cd integrations/jira
-   mvn spring-boot:run
+You can also start any service individually by running:
 
-   # Start GitHub Integration
-   cd integrations/github
-   mvn spring-boot:run
-
-   # Start Google Calendar Integration
-   cd integrations/google
-   mvn spring-boot:run
-
-   # Start Slack Integration
-   cd integrations/slack
-   mvn spring-boot:run
-   ```
+```sh
+cd integrations/<service>
+mvn spring-boot:run
+```
 
 ### Frontend UI
 
@@ -126,18 +118,22 @@ Each integration service runs on its own port:
    sudo nginx -s reload
    ```
 
+**All API and UI access should be done via Nginx on port 8080.**
+
 ## Service Health Monitoring
 
-The application includes a health check dashboard that monitors the status of all integration services. The health check
-endpoints are:
+The application includes a health check dashboard that monitors the status of all integration services. The main health
+check endpoint is:
 
-- API Layer: `http://localhost:8080/health/api`
-- Slack: `http://localhost:8080/health/slack`
-- GitHub: `http://localhost:8080/health/github`
-- Jira: `http://localhost:8080/health/jira`
-- Google: `http://localhost:8080/health/google`
+- System Health: `http://localhost:8080/api/system/health`
 
-Each service exposes a Spring Boot Actuator health endpoint at `/actuator/health` that returns the service status.
+Each service also exposes a Spring Boot Actuator health endpoint at `/actuator/health` on its respective port:
+
+- API Layer: `http://localhost:8085/actuator/health`
+- Slack: `http://localhost:8083/actuator/health`
+- GitHub: `http://localhost:8081/actuator/health`
+- Jira: `http://localhost:8084/actuator/health`
+- Google: `http://localhost:8082/actuator/health`
 
 ### Health Check UI
 
@@ -149,30 +145,27 @@ The health check dashboard is available at `http://localhost:3000/health` after 
 - Manual refresh option
 - Auto-refresh every 30 seconds
 
-## Key Endpoints
+## Key Endpoints (All via Nginx on port 8080)
 
-### GitHub Integration (Port 8081)
-
+### GitHub Integration
 - `/api/github/oauth/url` - Get GitHub OAuth URL
 - `/api/github/oauth/callback` - GitHub OAuth callback
 - `/api/github/status` - Check GitHub integration status
 - `/actuator/health` - Service health check
 
-### Google Calendar Integration (Port 8082)
-
+### Google Calendar Integration
 - `/api/google/calendar/oauth/url` - Get Google Calendar OAuth URL
 - `/api/google/calendar/oauth/callback` - Google Calendar OAuth callback
 - `/api/google/calendar/status` - Check Google Calendar integration status
 - `/actuator/health` - Service health check
 
-### Slack Integration (Port 8083)
+### Slack Integration
 - `/api/slack/oauth/url` - Get Slack OAuth URL
 - `/api/slack/oauth/callback` - Slack OAuth callback
 - `/api/slack/status` - Check Slack integration status
 - `/actuator/health` - Service health check
 
-### Jira Integration (Port 8084)
-
+### Jira Integration
 - `/api/jira/oauth/url` - Get Jira OAuth URL
 - `/api/jira/oauth/callback` - Jira OAuth callback
 - `/api/jira/status` - Check Jira integration status
@@ -191,23 +184,12 @@ The `nginx.conf` file in the project root configures Nginx as a reverse proxy fo
 
 ```nginx
 # Health check endpoints
-location /health/api {
+location /api/system/health {
+    proxy_pass http://localhost:8085/api/system/health;
+}
+location /actuator/health {
     proxy_pass http://localhost:8085/actuator/health;
 }
-location /health/slack {
-    proxy_pass http://localhost:8083/actuator/health;
-}
-location /health/github {
-    proxy_pass http://localhost:8081/actuator/health;
-}
-location /health/jira {
-    proxy_pass http://localhost:8084/actuator/health;
-}
-location /health/google {
-    proxy_pass http://localhost:8082/actuator/health;
-}
-
-# API endpoints
 location /api/jira/ {
     proxy_pass http://localhost:8084/api/jira/;
 }

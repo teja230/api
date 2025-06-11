@@ -12,10 +12,9 @@
 /Users/teja/IdeaProjects/api/api-layer/src/main/java/com/service/api/helpers/StringUtils.java
 /Users/teja/IdeaProjects/api/api-layer/src/main/java/com/enterprise/agents/service/AuditService.java
 /Users/teja/IdeaProjects/api/api-layer/src/main/java/com/enterprise/agents/config/SecurityConfig.java
-/Users/teja/IdeaProjects/api/api-layer/src/main/java/com/enterprise/agents/agent/SlackOnboardingAgent.java
 /Users/teja/IdeaProjects/api/api-layer/src/main/java/com/service/api/helpers/HttpHelper.java
 /Users/teja/IdeaProjects/api/api-layer/src/main/java/com/enterprise/agents/exception/GlobalExceptionHandler.java
 /Users/teja/IdeaProjects/api/api-layer/src/main/java/com/enterprise/agents/controller/SlackOAuthController.java
-/Users/teja/IdeaProjects/api/api-layer/src/main/java/com/enterprise/agents/service/SlackService.java
 /Users/teja/IdeaProjects/api/api-layer/src/main/java/com/enterprise/agents/controller/CustomErrorController.java
 /Users/teja/IdeaProjects/api/api-layer/src/main/java/com/enterprise/agents/controller/SystemHealthController.java
+/Users/teja/IdeaProjects/api/api-layer/src/main/java/com/enterprise/SecurityConfig.java

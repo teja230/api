@@ -17,10 +17,10 @@ import java.util.Map;
 public class SystemHealthController {
 
     private static final Map<String, String> SERVICE_URLS = Map.of(
-            "github", "http://localhost:8080/api/github/actuator/health",
-            "google-calendar", "http://localhost:8080/api/google/actuator/health",
-            "slack", "http://localhost:8080/api/slack/actuator/health",
-            "jira", "http://localhost:8080/api/jira/actuator/health"
+            "github", "http://localhost:8085/actuator/health",
+            "google-calendar", "http://localhost:8085/actuator/health",
+            "slack", "http://localhost:8085/actuator/health",
+            "jira", "http://localhost:8085/actuator/health"
     );
     @Autowired
     private RestTemplate restTemplate;
@@ -54,7 +54,7 @@ public class SystemHealthController {
                 status.put("details", healthData);
             } else {
                 status.put("status", "DOWN");
-                status.put("error", "Service returned non-200 status");
+                status.put("error", "Service returned non-200 status: " + response.getStatusCode());
             }
         } catch (Exception e) {
             status.put("status", "DOWN");

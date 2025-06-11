@@ -11,6 +11,7 @@ com/enterprise/agents/config/DatabaseConfig$H2Config.class
 com/enterprise/agents/exception/GlobalExceptionHandler.class
 com/enterprise/agents/config/ExternalServicesConfig$Redis.class
 com/service/api/helpers/JsonPath$FieldToken.class
+com/enterprise/SecurityConfig.class
 com/service/api/APIService.class
 com/enterprise/agents/controller/SsoMockController.class
 com/service/api/helpers/Constants$LogCodes.class

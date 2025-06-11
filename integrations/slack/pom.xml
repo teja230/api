@@ -17,8 +17,6 @@
             <groupId>com.enterprise.agents</groupId>
             <artifactId>common</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
-            <type>test-jar</type>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -50,11 +48,6 @@
             <groupId>jakarta.persistence</groupId>
             <artifactId>jakarta.persistence-api</artifactId>
             <version>3.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.enterprise.agents</groupId>
-            <artifactId>jira</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
