@@ -23,7 +23,7 @@ repeatability.
 
 **Key Features:**
 
-- Cross-tool unified onboarding (Slack, Jira, SAP, etc.)
+- Cross-tool unified onboarding (Slack, Jira, GitHub, Google etc.)
 
 **Planned Features:**
 
