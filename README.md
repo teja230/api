@@ -1,5 +1,7 @@
 # Onboarding App
 
+![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
+
 ## Goal
 
 🧠 AI Agents for Enterprise Workflows
@@ -50,6 +52,15 @@ repeatability.
     - `slack/`: Slack integration service
 - `api-layer/`: API gateway layer (aggregates integration services)
 - `ui-app/`: Frontend UI application (React)
+
+## License and Commercial Use
+
+This project is distributed under the [Apache License, Version 2.0](LICENSE), a
+permissive open source license. You are free to use the code, modify it, and
+even build paid services on top of it.
+
+If you would like hands-on setup help or a commercial license that supports the
+maintainer, [Contact the project maintainer](mailto:teja230@gmail.com).
 
 ## Prerequisites
 
