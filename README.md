@@ -1,5 +1,7 @@
 # Onboarding App
 
+![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
+
 ## Goal
 
 🧠 AI Agents for Enterprise Workflows
@@ -53,10 +55,12 @@ repeatability.
 
 ## License and Commercial Use
 
-This project is distributed under the [Apache License, Version 2.0](LICENSE).
+This project is distributed under the [Apache License, Version 2.0](LICENSE), a
+permissive open source license. You are free to use the code, modify it, and
+even build paid services on top of it.
 
-For paid setup assistance or commercial licensing options that benefit the
-project maintainer, [Contact the project maintainer](mailto:teja230@gmail.com).
+If you would like hands-on setup help or a commercial license that supports the
+maintainer, [contact me](mailto:teja230@gmail.com).
 
 ## Prerequisites
 
@@ -339,3 +343,4 @@ before running the tests.
       repository in `~/.m2` and install node packages manually before
       running builds or tests.
 
+---
