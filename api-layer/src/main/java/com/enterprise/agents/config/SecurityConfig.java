@@ -27,6 +27,8 @@ public class SecurityConfig {
                                 "/api/sso/user",
                                 "/api/sso/error",
                                 "/api/sso/initiate",
+                                "/api/health",
+                                "/api/health/**",
                                 "/actuator/health",
                                 "/actuator/health/**",
                                 "/api/system/health",
@@ -63,4 +65,4 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-} 
+}

@@ -14,9 +14,9 @@ import {
   Tooltip
 } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import ErrorIcon from '@mui/icons-material/Error';
+import { API_BASE_URL } from '../services/api';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { getSystemHealth } from '../services/api';
+import ErrorIcon from '@mui/icons-material/Error';
 
 const HealthPage = () => {
   const [services, setServices] = useState({});
@@ -28,10 +28,11 @@ const HealthPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await getSystemHealth();
-      if (response && response.services) {
-        setServices(response.services);
-        setLastUpdated(response.timestamp);
+      const response = await fetch(`${API_BASE_URL}/health/aggregate`, { credentials: 'include' });
+      const data = await response.json();
+      if (data && typeof data === 'object') {
+        setServices(data);
+        setLastUpdated(Date.now());
       } else {
         setError('Invalid health data format received');
       }
@@ -149,7 +150,7 @@ const HealthPage = () => {
                 <CardContent>
                   <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                     <Typography variant="h6" component="h2">
-                      {data.name}
+                      {serviceId.charAt(0).toUpperCase() + serviceId.slice(1)}
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       {getStatusIcon(data.status)}
@@ -160,26 +161,6 @@ const HealthPage = () => {
                       />
                     </Box>
                   </Box>
-                  <Typography color="textSecondary" gutterBottom>
-                    Last Checked: {formatLastChecked(data.lastChecked)}
-                  </Typography>
-                  {data.error && (
-                    <Typography color="error" variant="body2" sx={{ mt: 1 }}>
-                      Error: {data.error}
-                    </Typography>
-                  )}
-                  {data.details && data.details.details && (
-                    <Box sx={{ mt: 2 }}>
-                      <Typography variant="body2" color="text.secondary" gutterBottom>
-                        Details:
-                      </Typography>
-                      {Object.entries(data.details.details).map(([key, value]) => (
-                        <Typography key={key} variant="body2" color="text.secondary">
-                          {key}: {typeof value === 'object' ? JSON.stringify(value) : value}
-                        </Typography>
-                      ))}
-                    </Box>
-                  )}
                 </CardContent>
               </Card>
             </Paper>
@@ -190,4 +171,4 @@ const HealthPage = () => {
   );
 };
 
-export default HealthPage; 
+export default HealthPage;

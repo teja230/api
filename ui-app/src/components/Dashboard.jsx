@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Container, Grid, Card, CardContent, Typography, Box, Button } from '@mui/material';
-import { 
+import { Container, Grid, Card, CardContent, Typography, Box, Button, Chip, CircularProgress } from '@mui/material';
+import {
   FaUsers, 
   FaRocket, 
   FaClock, 
@@ -12,6 +12,9 @@ import {
   FaClipboardList
 } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../services/api';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -78,8 +81,38 @@ const Dashboard = () => {
     }
   ];
 
+  const [healthSummary, setHealthSummary] = useState({ loading: true, allUp: true, details: {} });
+
+  useEffect(() => {
+    const fetchHealth = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/health/aggregate`, { credentials: 'include' });
+        const data = await res.json();
+        const allUp = Object.values(data).every(s => s.status && s.status.toLowerCase() === 'up');
+        setHealthSummary({ loading: false, allUp, details: data });
+      } catch {
+        setHealthSummary({ loading: false, allUp: false, details: {} });
+      }
+    };
+    fetchHealth();
+  }, []);
+
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      {/* Health summary widget */}
+      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
+        {healthSummary.loading ? (
+          <CircularProgress size={20} />
+        ) : healthSummary.allUp ? (
+          <Chip icon={<CheckCircleIcon color="success" />} label="All systems operational" color="success" />
+        ) : (
+          <Chip icon={<ErrorIcon color="error" />} label="Some services down" color="error" />
+        )}
+        <Button size="small" variant="outlined" onClick={() => window.location.href='/health'}>
+          View Details
+        </Button>
+      </Box>
+
       <Typography variant="h4" component="h1" gutterBottom>
         Welcome to Onboarding Dashboard
       </Typography>
@@ -158,4 +191,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard; 
+export default Dashboard;
