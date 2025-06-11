@@ -56,7 +56,7 @@ repeatability.
 This project is distributed under the [Apache License, Version 2.0](LICENSE).
 
 For paid setup assistance or commercial licensing options that benefit the
-project maintainer, [contact me](mailto:teja230@gmail.com).
+project maintainer, [Contact the project maintainer](mailto:teja230@gmail.com).
 
 ## Prerequisites
 
