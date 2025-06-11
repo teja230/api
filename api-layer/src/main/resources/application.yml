@@ -27,10 +27,31 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metrics
+      base-path: /actuator
   endpoint:
     health:
       show-details: always
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: db,diskSpace
+        liveness:
+          include: ping
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+    diskspace:
+      enabled: true
+    db:
+      enabled: true
+    ping:
+      enabled: true
+    defaults:
+      enabled: true
 
 cors:
   allowed-origins: http://localhost:3000

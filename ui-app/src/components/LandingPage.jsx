@@ -80,7 +80,8 @@ const LandingPage = () => {
               px: 4,
               py: 1.5,
               borderRadius: '30px',
-              fontSize: '1.1rem'
+              fontSize: '1.1rem',
+              boxShadow: 3
             }}
           >
             Get Started <FaArrowRight style={{ marginLeft: '8px' }} />
@@ -89,11 +90,18 @@ const LandingPage = () => {
 
         {/* Features Section */}
         <Box sx={{ py: { xs: 4, md: 6 } }}>
+          <Typography variant="h4" component="h2" sx={{ 
+            mb: 4, 
+            textAlign: 'center',
+            fontWeight: 'bold'
+          }}>
+            Key Features
+          </Typography>
           <Grid container spacing={3} justifyContent="center">
             {features.map((feature, index) => (
               <Grid item xs={12} sm={6} md={4} key={index}>
                 <Paper
-                  elevation={0}
+                  elevation={3}
                   sx={{
                     p: 4,
                     height: '100%',
@@ -101,9 +109,10 @@ const LandingPage = () => {
                     backdropFilter: 'blur(10px)',
                     borderRadius: '16px',
                     border: '1px solid rgba(255, 255, 255, 0.2)',
-                    transition: 'transform 0.3s ease-in-out',
+                    transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
                     '&:hover': {
-                      transform: 'translateY(-8px)'
+                      transform: 'translateY(-8px)',
+                      boxShadow: 6
                     }
                   }}
                 >
@@ -140,7 +149,7 @@ const LandingPage = () => {
           textAlign: 'center',
           mt: 'auto'
         }}>
-          <Typography variant="h4" sx={{ mb: 3 }}>
+          <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold' }}>
             Ready to transform your onboarding process?
           </Typography>
           <Button
@@ -157,7 +166,8 @@ const LandingPage = () => {
               px: 4,
               py: 1.5,
               borderRadius: '30px',
-              fontSize: '1.1rem'
+              fontSize: '1.1rem',
+              boxShadow: 1
             }}
           >
             Start Free Trial <FaArrowRight style={{ marginLeft: '8px' }} />

@@ -20,56 +20,70 @@ to help with Onboarding new employees.
 
 ## Prerequisites
 
-- Java 17+
-- Maven 3.6+
-- Node.js 18+ (for UI)
-- Redis (for token storage)
-- Nginx (for reverse proxy)
+The application requires the following dependencies:
+
+- Java 17 or higher
+- Maven 3.6 or higher
+- Node.js 18 or higher
+- Redis 6 or higher
+- Nginx 1.18 or higher
 
 ## Setup
 
-1. **Clone the repository**
-   ```sh
-   git clone <your-repo-url>
-   cd <repo-root>
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd api
    ```
 
-2. **Install prerequisites**
-   Run the helper script to install Java, Maven, Node.js, Redis and Nginx on Debian/Ubuntu systems:
-   ```sh
-   ./install-dependencies.sh
-   ```
-
-3. **Configure environment variables**
+2. Configure environment variables
    For each integration service, configure the respective credentials in their `application.properties` files:
 
-    - GitHub (`integrations/github/src/main/resources/application.properties`):
-      ```properties
-      github.oauth.client-id=<your-client-id>
-      github.oauth.client-secret=<your-client-secret>
-      github.oauth.redirect-uri=http://localhost:8081/api/github/oauth/callback
-      ```
+   - GitHub (`integrations/github/src/main/resources/application.properties`):
+     ```properties
+     github.oauth.client-id=<your-client-id>
+     github.oauth.client-secret=<your-client-secret>
+     github.oauth.redirect-uri=http://localhost:8081/api/github/oauth/callback
+     ```
 
-    - Google Calendar (`integrations/google/src/main/resources/application.properties`):
-      ```properties
-      google.oauth.client-id=<your-client-id>
-      google.oauth.client-secret=<your-client-secret>
-      google.oauth.redirect-uri=http://localhost:8082/api/google/calendar/oauth/callback
-      ```
+   - Google Calendar (`integrations/google/src/main/resources/application.properties`):
+     ```properties
+     google.oauth.client-id=<your-client-id>
+     google.oauth.client-secret=<your-client-secret>
+     google.oauth.redirect-uri=http://localhost:8082/api/google/calendar/oauth/callback
+     ```
 
-    - Jira (`integrations/jira/src/main/resources/application.properties`):
-      ```properties
-      jira.oauth.client-id=<your-client-id>
-      jira.oauth.client-secret=<your-client-secret>
-      jira.oauth.redirect-uri=http://localhost:8084/api/jira/oauth/callback
-      ```
+   - Jira (`integrations/jira/src/main/resources/application.properties`):
+     ```properties
+     jira.oauth.client-id=<your-client-id>
+     jira.oauth.client-secret=<your-client-secret>
+     jira.oauth.redirect-uri=http://localhost:8084/api/jira/oauth/callback
+     ```
 
-    - Slack (`integrations/slack/src/main/resources/application.properties`):
-      ```properties
-      slack.oauth.client-id=<your-client-id>
-      slack.oauth.client-secret=<your-client-secret>
-      slack.oauth.redirect-uri=http://localhost:8083/api/slack/oauth/callback
-      ```
+   - Slack (`integrations/slack/src/main/resources/application.properties`):
+     ```properties
+     slack.oauth.client-id=<your-client-id>
+     slack.oauth.client-secret=<your-client-secret>
+     slack.oauth.redirect-uri=http://localhost:8083/api/slack/oauth/callback
+     ```
+
+3. Start all services:
+   ```bash
+   ./start-services.sh
+   ```
+   This script will:
+   - Check for required dependencies
+   - Install missing dependencies if needed (using Homebrew on macOS, apt-get on Linux)
+   - Start Redis (if not already running)
+   - Start Nginx (without sudo on macOS, with sudo on Linux)
+   - Start all backend services (API Layer, GitHub, Google, Slack, Jira)
+   - Start the UI application
+
+4. Stop all services:
+   ```bash
+   ./stop-services.sh
+   ```
+   This will gracefully stop all running services.
 
 ## How to Run
 
@@ -81,42 +95,65 @@ Use the provided script to start all backend services in microservices mode:
 ./start-services.sh
 ```
 
-This will start:
+This will:
 
-- GitHub Integration (port 8081)
-- Google Calendar Integration (port 8082)
-- Slack Integration (port 8083)
-- Jira Integration (port 8084)
-- API Layer (port 8085)
+- Check and install any missing dependencies (using Homebrew on macOS, apt-get on Linux)
+- Start Redis (if not already running)
+- Start Nginx (without sudo on macOS, with sudo on Linux)
+- Start all backend services:
+   - GitHub Integration (port 8081)
+   - Google Calendar Integration (port 8082)
+   - Slack Integration (port 8083)
+   - Jira Integration (port 8084)
+   - API Layer (port 8085)
+- Start the UI application (port 3000)
 
-You can also start any service individually by running:
+### Stop All Services
+
+To stop all services (including the UI, Redis, and Nginx), run:
 
 ```sh
-cd integrations/<service>
-mvn spring-boot:run
+./stop-services.sh
 ```
+
+This script will:
+
+- Stop all integration services (ports 8081, 8082, 8083, 8084, 8085)
+- Stop the UI (React dev server on port 3000)
+- Shut down Redis
+- Stop Nginx (without sudo on macOS, with sudo on Linux)
 
 ### Frontend UI
 
-1. Install dependencies and run the UI:
-   ```sh
-   cd ui-app
-   npm install
-   npm start
-   ```
-   The UI will be available at `http://localhost:3000`.
+The UI is started automatically by `start-services.sh`. If you need to run it manually:
+
+```sh
+cd ui-app
+npm install
+npm start
+```
+
+The UI will be available at `http://localhost:3000`.
 
 ### Nginx Reverse Proxy
 
-1. Start Nginx with the provided configuration:
-   ```sh
-   sudo nginx -c /path/to/project/nginx.conf
-   ```
+The Nginx reverse proxy is started automatically by `start-services.sh`. If you need to manage it manually:
 
-2. To reload Nginx configuration after changes:
-   ```sh
-   sudo nginx -s reload
-   ```
+On macOS (Homebrew):
+
+```sh
+nginx -c /path/to/project/nginx.conf
+nginx -s reload  # To reload configuration
+nginx -s stop    # To stop
+```
+
+On Linux:
+
+```sh
+sudo nginx -c /path/to/project/nginx.conf
+sudo nginx -s reload  # To reload configuration
+sudo nginx -s stop    # To stop
+```
 
 **All API and UI access should be done via Nginx on port 8080.**
 

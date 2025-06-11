@@ -25,8 +25,10 @@ public class SecurityConfig {
                                 "/api/github/oauth/url",
                                 "/api/github/oauth/callback",
                                 "/api/github/disconnect",
-                                "/actuator/health",
-                                "/actuator/health/**"
+                                "/actuator/**",
+                                "/actuator/health/**",
+                                "/actuator/info/**",
+                                "/actuator/metrics/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

@@ -9,7 +9,9 @@ import TeamsPage from './components/TeamsPage';
 import IntegrationsPage from './components/IntegrationsPage';
 import HealthPage from './components/HealthPage';
 import Header from './components/Header';
-import { Container, Typography } from '@mui/material';
+import ViewProgress from './components/ViewProgress';
+import ViewReports from './components/ViewReports';
+import NewTeamPage from './components/NewTeamPage';
 
 const theme = createTheme({
   palette: {
@@ -22,28 +24,6 @@ const theme = createTheme({
     },
   },
 });
-
-// Placeholder components for new routes
-const NewTeamPage = () => (
-  <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-    <Typography variant="h4">Add New Team</Typography>
-    {/* Add team form will go here */}
-  </Container>
-);
-
-const TeamProgressPage = () => (
-  <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-    <Typography variant="h4">Team Progress</Typography>
-    {/* Team progress view will go here */}
-  </Container>
-);
-
-const ReportsPage = () => (
-  <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-    <Typography variant="h4">Reports</Typography>
-    {/* Reports view will go here */}
-  </Container>
-);
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -105,20 +85,41 @@ function App() {
     );
   };
 
+  const PublicRoute = ({ children }) => {
+    if (loading) {
+      return <div>Loading...</div>;
+    }
+    return isAuthenticated ? <Navigate to="/dashboard" replace /> : children;
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
         <Routes>
-          <Route path="/" element={<LandingPage />} />
+          {/* Public routes */}
+          <Route 
+            path="/" 
+            element={
+              <PublicRoute>
+                <LandingPage />
+              </PublicRoute>
+            } 
+          />
           <Route 
             path="/login" 
             element={
-              isAuthenticated ? 
-                <Navigate to="/dashboard" /> : 
+              <PublicRoute>
                 <Login onLogin={handleLogin} />
+              </PublicRoute>
             } 
           />
+
+          {/* Protected routes */}
           <Route 
             path="/dashboard" 
             element={
@@ -171,7 +172,7 @@ function App() {
             path="/teams/progress"
             element={
               <ProtectedRoute>
-                <TeamProgressPage />
+                <ViewProgress />
               </ProtectedRoute>
             }
           />
@@ -179,10 +180,13 @@ function App() {
             path="/reports"
             element={
               <ProtectedRoute>
-                <ReportsPage />
+                <ViewReports />
               </ProtectedRoute>
             }
           />
+
+          {/* Catch all route */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
     </ThemeProvider>
