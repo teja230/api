@@ -157,30 +157,39 @@ fi
 # Start Nginx if not running
 echo "Starting Nginx..."
 if ! pgrep nginx > /dev/null; then
+    NGINX_CONF="$(pwd)/nginx.conf"
+    if [ ! -f "$NGINX_CONF" ]; then
+        echo "Error: nginx.conf not found at $NGINX_CONF"
+        exit 1
+    fi
+    
+    # Stop any existing Nginx processes
+    pkill nginx 2>/dev/null
+    
     if [[ "$OSTYPE" == "darwin"* ]]; then
         # On macOS, use Homebrew's Nginx
-        if ! nginx -t -c "$(pwd)/nginx.conf"; then
+        if ! nginx -t -c "$NGINX_CONF"; then
             echo "Error: Nginx configuration test failed"
             exit 1
         fi
-        nginx -c "$(pwd)/nginx.conf"
+        nginx -c "$NGINX_CONF"
         if [ $? -ne 0 ]; then
             echo "Failed to start Nginx"
             exit 1
         fi
     else
         # On Linux, use system Nginx with sudo
-        if ! sudo nginx -t -c "$(pwd)/nginx.conf"; then
+        if ! sudo nginx -t -c "$NGINX_CONF"; then
             echo "Error: Nginx configuration test failed"
             exit 1
         fi
-        sudo nginx -c "$(pwd)/nginx.conf"
+        sudo nginx -c "$NGINX_CONF"
         if [ $? -ne 0 ]; then
             echo "Failed to start Nginx"
             exit 1
         fi
     fi
-    echo "Nginx started successfully"
+    echo "Nginx started successfully with config: $NGINX_CONF"
 else
     echo "Nginx is already running"
 fi
@@ -325,30 +334,39 @@ fi
 # Start Nginx if not running
 echo "Starting Nginx..."
 if ! pgrep nginx > /dev/null; then
+    NGINX_CONF="$(pwd)/nginx.conf"
+    if [ ! -f "$NGINX_CONF" ]; then
+        echo "Error: nginx.conf not found at $NGINX_CONF"
+        exit 1
+    fi
+    
+    # Stop any existing Nginx processes
+    pkill nginx 2>/dev/null
+    
     if [[ "$OSTYPE" == "darwin"* ]]; then
         # On macOS, use Homebrew's Nginx
-        if ! nginx -t -c "$(pwd)/nginx.conf"; then
+        if ! nginx -t -c "$NGINX_CONF"; then
             echo "Error: Nginx configuration test failed"
             exit 1
         fi
-        nginx -c "$(pwd)/nginx.conf"
+        nginx -c "$NGINX_CONF"
         if [ $? -ne 0 ]; then
             echo "Failed to start Nginx"
             exit 1
         fi
     else
         # On Linux, use system Nginx with sudo
-        if ! sudo nginx -t -c "$(pwd)/nginx.conf"; then
+        if ! sudo nginx -t -c "$NGINX_CONF"; then
             echo "Error: Nginx configuration test failed"
             exit 1
         fi
-        sudo nginx -c "$(pwd)/nginx.conf"
+        sudo nginx -c "$NGINX_CONF"
         if [ $? -ne 0 ]; then
             echo "Failed to start Nginx"
             exit 1
         fi
     fi
-    echo "Nginx started successfully"
+    echo "Nginx started successfully with config: $NGINX_CONF"
 else
     echo "Nginx is already running"
 fi
@@ -452,9 +470,9 @@ cleanup() {
         fi
     done
     if [[ "$OSTYPE" == "darwin"* ]]; then
-        nginx -s stop
+        nginx -s stop -c "$NGINX_CONF"
     else
-        sudo nginx -s stop
+        sudo nginx -s stop -c "$NGINX_CONF"
     fi
 }
 trap cleanup EXIT

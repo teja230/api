@@ -52,7 +52,7 @@ const Login = ({ onLogin }) => {
     setError(null);
     try {
       const response = await fetch(`${API_BASE_URL}/sso/initiate`, {
-        method: 'GET',
+        method: 'POST',
         credentials: 'include',
         headers: {
           'Accept': 'application/json',

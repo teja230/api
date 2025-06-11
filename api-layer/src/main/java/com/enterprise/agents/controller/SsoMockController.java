@@ -12,7 +12,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/sso")
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class SsoMockController {
     private static final Map<String, String> STATE_STORE = new HashMap<>();
 
@@ -25,7 +24,7 @@ public class SsoMockController {
         STATE_STORE.put(state, "company");
 
         // For mock purposes, we'll use a mock SSO URL
-        String authUrl = "http://localhost:8085/api/sso/callback?code=mock-company-code&state=" + state;
+        String authUrl = "http://localhost:8080/api/sso/callback?code=mock-company-code&state=" + state;
 
         return ResponseEntity.ok(Map.of(
                 "url", authUrl,

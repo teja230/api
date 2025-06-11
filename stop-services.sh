@@ -65,13 +65,35 @@ fi
 
 # Stop Nginx
 echo "Stopping Nginx..."
+NGINX_CONF="$(pwd)/nginx.conf"
+if [ ! -f "$NGINX_CONF" ]; then
+    echo "Warning: nginx.conf not found at $NGINX_CONF"
+fi
+
 if pgrep nginx > /dev/null; then
+    # First try graceful stop with config
     if [[ "$OSTYPE" == "darwin"* ]]; then
-        nginx -s stop -c "$(pwd)/nginx.conf"
+        nginx -s stop -c "$NGINX_CONF" 2>/dev/null || true
     else
-        sudo nginx -s stop -c "$(pwd)/nginx.conf"
+        sudo nginx -s stop -c "$NGINX_CONF" 2>/dev/null || true
     fi
-    echo "Nginx stopped gracefully"
+    
+    # Wait a moment for graceful shutdown
+    sleep 2
+    
+    # If still running, force kill
+    if pgrep nginx > /dev/null; then
+        echo "Nginx still running, force stopping..."
+        pkill nginx 2>/dev/null || true
+        sleep 1
+    fi
+    
+    # Final check
+    if pgrep nginx > /dev/null; then
+        echo "Warning: Could not stop Nginx completely. Manual intervention may be required."
+    else
+        echo "Nginx stopped successfully"
+    fi
 else
     echo "Nginx is not running"
 fi
