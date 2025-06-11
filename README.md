@@ -51,6 +51,13 @@ repeatability.
 - `api-layer/`: API gateway layer (aggregates integration services)
 - `ui-app/`: Frontend UI application (React)
 
+## License and Commercial Use
+
+This project is distributed under the [Apache License, Version 2.0](LICENSE).
+
+For paid setup assistance or commercial licensing options that benefit the
+project maintainer, [contact me](mailto:teja230@gmail.com).
+
 ## Prerequisites
 
 The application requires the following dependencies:
@@ -332,4 +339,3 @@ before running the tests.
       repository in `~/.m2` and install node packages manually before
       running builds or tests.
 
----
