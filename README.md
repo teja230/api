@@ -2,9 +2,41 @@
 
 ## Goal
 
-This project provides a backend API for integrating various services (Slack, GitHub, Google Calendar, Jira) and managing
-OAuth tokens. It is designed to facilitate secure service integrations and token management for enterprise applications
-to help with Onboarding new employees.
+🧠 AI Agents for Enterprise Workflows
+
+**Overview:**
+
+Autonomous AI agents designed to streamline and automate internal enterprise workflows such as onboarding, procurement
+approvals, and compliance checks. These agents integrate seamlessly with tools like Slack, Jira, SAP, and other
+enterprise systems to reduce manual overhead and improve operational efficiency.
+
+**Why Now:**
+
+Recent advances in Large Language Models (LLMs) have made it feasible to deploy multi-step, reasoning-capable agents.
+Enterprises are actively seeking intelligent automation to lower costs, increase productivity, and enhance agility in
+managing internal processes.
+
+**Target Customers:**
+
+Mid to large-sized enterprises with complex, cross-functional workflows that require high coordination, compliance, and
+repeatability.
+
+**Key Features:**
+
+- Cross-tool unified onboarding (Slack, Jira, SAP, etc.)
+
+**Planned Features:**
+
+- Context-aware, multi-step task automation
+- Human-in-the-loop escalation
+- Workflow auditing and traceability
+
+**Use Cases:**
+
+- Employee onboarding coordination
+- Procurement and vendor approvals
+- Internal compliance workflows
+- IT service management automation
 
 ![Onboarding App](img.png)
 
