@@ -2,11 +2,13 @@
 *.class
 .idea/
 .vscode/
+logs
 node_modules
 target
 
 # Log file
 *.log
+*.pid
 
 # BlueJ files
 *.ctxt
@@ -29,3 +31,4 @@ hs_err_pid*
 /box/target/
 
 cookies.txt
+

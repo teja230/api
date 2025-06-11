@@ -98,20 +98,20 @@ for port in "${PORTS[@]}"; do
     fi
     # Clean up PID files if present
     case $port in
-        8081) rm -f .github.pid ;;
-        8082) rm -f .google.pid ;;
-        8083) rm -f .slack.pid ;;
-        8084) rm -f .jira.pid ;;
-        8085) rm -f .api.pid ;;
-        3000) rm -f .ui.pid ;;
+      8081) rm -f logs/.github.pid ;;
+      8082) rm -f logs/.google.pid ;;
+      8083) rm -f logs/.slack.pid ;;
+      8084) rm -f logs/.jira.pid ;;
+      8085) rm -f logs/.api.pid ;;
+      3000) rm -f logs/.ui.pid ;;
     esac
     # Log action
-    echo "Checked and cleaned up for port $port" >> stop-services.log
+    echo "Checked and cleaned up for port $port" >> logs/stop-services.log
 done
 
 # Cleanup temporary files
 echo "Cleaning up..."
-rm -f *.log
+rm -f logs/*.log
 rm -f /tmp/*.pid
 
 echo "All services stopped." 

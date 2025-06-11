@@ -114,28 +114,28 @@ fi
 PORTS=(8081 8082 8083 8084 8085 3000 80)
 for port in "${PORTS[@]}"; do
     if lsof -i :$port | grep LISTEN > /dev/null; then
-        echo "Error: Port $port is already in use by the following process(es):" | tee -a start-services.log
-        lsof -i :$port | grep LISTEN | tee -a start-services.log
-        echo "Aborting startup. Please free the port and try again." | tee -a start-services.log
+        echo "Error: Port $port is already in use by the following process(es):" | tee -a logs/start-services.log
+        lsof -i :$port | grep LISTEN | tee -a logs/start-services.log
+        echo "Aborting startup. Please free the port and try again." | tee -a logs/start-services.log
         exit 1
     else
-        echo "Port $port is free." | tee -a start-services.log
+        echo "Port $port is free." | tee -a logs/start-services.log
     fi
-    echo "Checked port $port before startup" >> start-services.log
+    echo "Checked port $port before startup" >> logs/start-services.log
 done
 
 # Special handling for Redis (6379)
 if lsof -i :6379 | grep LISTEN > /dev/null; then
     if lsof -i :6379 | grep 'redis-ser' > /dev/null; then
-        echo "Redis is already running on port 6379. Skipping Redis startup." | tee -a start-services.log
+        echo "Redis is already running on port 6379. Skipping Redis startup." | tee -a logs/start-services.log
     else
-        echo "Error: Port 6379 is in use by a non-Redis process:" | tee -a start-services.log
-        lsof -i :6379 | grep LISTEN | tee -a start-services.log
-        echo "Aborting startup. Please free port 6379 and try again." | tee -a start-services.log
+        echo "Error: Port 6379 is in use by a non-Redis process:" | tee -a logs/start-services.log
+        lsof -i :6379 | grep LISTEN | tee -a logs/start-services.log
+        echo "Aborting startup. Please free port 6379 and try again." | tee -a logs/start-services.log
         exit 1
     fi
 else
-    echo "Port 6379 is free. Redis will be started by the script." | tee -a start-services.log
+    echo "Port 6379 is free. Redis will be started by the script." | tee -a logs/start-services.log
 fi
 
 # Start Nginx if not running
@@ -312,7 +312,7 @@ echo "Starting services..."
 # Start API Layer
 echo "Starting API Layer on port $API_PORT..."
 cd api-layer
-mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dserver.port=$API_PORT" > ../api-layer.log 2>&1 &
+mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dserver.port=$API_PORT" > logs/api-layer.log 2>&1 &
 API_PID=$!
 cd ..
 echo $API_PID > .api.pid
@@ -321,7 +321,7 @@ sleep 10  # Wait for API Layer to initialize
 # Start GitHub Service
 echo "Starting GitHub Service on port $GITHUB_PORT..."
 cd integrations/github
-mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dserver.port=$GITHUB_PORT" > ../../github.log 2>&1 &
+mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dserver.port=$GITHUB_PORT" > logs/github.log 2>&1 &
 GITHUB_PID=$!
 cd ../..
 echo $GITHUB_PID > .github.pid
@@ -330,7 +330,7 @@ sleep 5  # Wait for GitHub service to initialize
 # Start Google Service
 echo "Starting Google Service on port $GOOGLE_PORT..."
 cd integrations/google
-mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dserver.port=$GOOGLE_PORT" > ../../google.log 2>&1 &
+mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dserver.port=$GOOGLE_PORT" > logs/google.log 2>&1 &
 GOOGLE_PID=$!
 cd ../..
 echo $GOOGLE_PID > .google.pid
@@ -339,7 +339,7 @@ sleep 5  # Wait for Google service to initialize
 # Start Slack Service
 echo "Starting Slack Service on port $SLACK_PORT..."
 cd integrations/slack
-mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dserver.port=$SLACK_PORT" > ../../slack.log 2>&1 &
+mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dserver.port=$SLACK_PORT" > logs/slack.log 2>&1 &
 SLACK_PID=$!
 cd ../..
 echo $SLACK_PID > .slack.pid
@@ -348,7 +348,7 @@ sleep 5  # Wait for Slack service to initialize
 # Start Jira Service
 echo "Starting Jira Service on port $JIRA_PORT..."
 cd integrations/jira
-mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dserver.port=$JIRA_PORT" > ../../jira.log 2>&1 &
+mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dserver.port=$JIRA_PORT" > logs/jira.log 2>&1 &
 JIRA_PID=$!
 cd ../..
 echo $JIRA_PID > .jira.pid
@@ -357,7 +357,7 @@ sleep 5  # Wait for Jira service to initialize
 # Start UI application
 echo "Starting UI application..."
 cd ui-app
-npm start > ../ui.log 2>&1 &
+npm start > logs/ui.log 2>&1 &
 UI_PID=$!
 cd ..
 echo $UI_PID > .ui.pid
@@ -451,4 +451,3 @@ cleanup() {
 }
 trap cleanup EXIT
 wait
-
