@@ -185,56 +185,62 @@ const HealthPage = () => {
       <Grid container spacing={3}>
         {Object.entries(health.details).map(([serviceId, data]) => (
           <Grid item xs={12} sm={6} md={4} key={serviceId}>
-            <Paper 
-              elevation={3}
+            <Card
+              elevation={4}
               sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'stretch',
+                minHeight: 220,
+                borderRadius: 3,
+                boxShadow: 3,
+                p: 0,
+                overflow: 'visible',
                 transition: 'transform 0.2s',
-                '&:hover': {
-                  transform: 'translateY(-4px)'
-                }
+                '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 }
               }}
             >
-              <Card>
-                <CardContent>
-                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                    <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold' }}>
+              <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', p: 3 }}>
+                <Box display="flex" alignItems="center" gap={2} mb={2}>
+                  <Box
+                    sx={{
+                      bgcolor: getServiceColor(serviceId),
+                      color: '#fff',
+                      borderRadius: '50%',
+                      width: 56,
+                      height: 56,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: 2,
+                      fontSize: 36
+                    }}
+                  >
+                    {getServiceIcon(serviceId)}
+                  </Box>
+                  <Box>
+                    <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold', fontSize: 20 }}>
                       {serviceId.charAt(0).toUpperCase() + serviceId.slice(1)}
                     </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      {getStatusIcon(data.status)}
-                      <Chip
-                        label={data.status || 'UNKNOWN'}
-                        color={getStatusColor(data.status)}
-                        size="small"
-                        sx={{ 
-                          fontWeight: 'bold',
-                          '& .MuiChip-label': {
-                            px: 2
-                          }
-                        }}
-                      />
-                    </Box>
+                    <Chip
+                      label={data.status ? data.status.toUpperCase() : 'UNKNOWN'}
+                      color={getStatusColor(data.status)}
+                      size="small"
+                      sx={{ fontWeight: 'bold', mt: 1 }}
+                    />
                   </Box>
-                  {data.error && (
-                    <Alert severity="error" sx={{ mt: 1 }}>
-                      {data.error}
-                    </Alert>
-                  )}
-                  {data.details && (
-                    <Box sx={{ mt: 2 }}>
-                      <Typography variant="body2" color="text.secondary">
-                        Last checked: {formatLastChecked(data.lastChecked)}
-                      </Typography>
-                    </Box>
-                  )}
-                </CardContent>
-              </Card>
-            </Paper>
+                </Box>
+                {data.error && (
+                  <Alert severity="error" sx={{ width: '100%', mb: 1 }}>
+                    {data.error}
+                  </Alert>
+                )}
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  Last checked: {formatLastChecked(data.lastChecked)}
+                </Typography>
+                {/* Optionally, add a description for each service here if available */}
+              </CardContent>
+            </Card>
           </Grid>
         ))}
-      </Grid>
-    </Container>
-  );
-};
-
-export default HealthPage;
+      </Grid
