@@ -22,6 +22,7 @@ spring:
     redis:
       host: localhost
       port: 6379
+      enabled: true
 
 management:
   endpoints:
@@ -54,9 +55,10 @@ management:
       enabled: true
 
 cors:
-  allowed-origins: http://localhost:3000
+  allowed-origins: http://localhost:3000,http://127.0.0.1:3000
   allowed-methods: GET,POST,PUT,DELETE,OPTIONS
   allowed-headers: "*"
+  allow-credentials: true
   max-age: 3600
 
 app:
@@ -98,3 +100,11 @@ logging:
     com.enterprise.agents: DEBUG
     org.springframework.web: INFO
     org.hibernate: INFO
+    org.springframework.security: DEBUG
+  file:
+    name: logs/api-layer.log
+    max-size: 10MB
+    max-history: 7
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

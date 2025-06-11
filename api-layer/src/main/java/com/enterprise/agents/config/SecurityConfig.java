@@ -30,7 +30,17 @@ public class SecurityConfig {
                                 "/actuator/health",
                                 "/actuator/health/**",
                                 "/api/system/health",
-                                "/api/system/health/**"
+                                "/api/system/health/**",
+                                "/api/github/actuator/health",
+                                "/api/github/actuator/health/**",
+                                "/api/google/actuator/health",
+                                "/api/google/actuator/health/**",
+                                "/api/slack/actuator/health",
+                                "/api/slack/actuator/health/**",
+                                "/api/jira/actuator/health",
+                                "/api/jira/actuator/health/**",
+                                "/api-layer/actuator/health",
+                                "/api-layer/actuator/health/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

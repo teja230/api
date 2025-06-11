@@ -1,5 +1,21 @@
 #!/bin/bash
 
+# Determine project root (directory where this script resides) and log directory
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+LOG_DIR="$SCRIPT_DIR/logs"
+
+# Create log directory and files (idempotent)
+echo "Creating log files..."
+mkdir -p "$LOG_DIR"
+# core service logs
+touch "$LOG_DIR/api-layer.log" "$LOG_DIR/github.log" "$LOG_DIR/google.log" \
+      "$LOG_DIR/slack.log" "$LOG_DIR/jira.log" "$LOG_DIR/ui.log" \
+      "$LOG_DIR/start-services.log"
+chmod 666 "$LOG_DIR"/*.log
+
+# Redirect all subsequent script tee outputs to start-services log variable
+LOG_TEE="| tee -a $LOG_DIR/start-services.log"
+
 # Check dependencies
 echo "Checking dependencies..."
 
@@ -114,28 +130,28 @@ fi
 PORTS=(8081 8082 8083 8084 8085 3000 80)
 for port in "${PORTS[@]}"; do
     if lsof -i :$port | grep LISTEN > /dev/null; then
-        echo "Error: Port $port is already in use by the following process(es):" | tee -a logs/start-services.log
-        lsof -i :$port | grep LISTEN | tee -a logs/start-services.log
-        echo "Aborting startup. Please free the port and try again." | tee -a logs/start-services.log
+        echo "Error: Port $port is already in use by the following process(es):" | tee -a $LOG_DIR/start-services.log
+        lsof -i :$port | grep LISTEN | tee -a $LOG_DIR/start-services.log
+        echo "Aborting startup. Please free the port and try again." | tee -a $LOG_DIR/start-services.log
         exit 1
     else
-        echo "Port $port is free." | tee -a logs/start-services.log
+        echo "Port $port is free." | tee -a $LOG_DIR/start-services.log
     fi
-    echo "Checked port $port before startup" >> logs/start-services.log
+    echo "Checked port $port before startup" >> $LOG_DIR/start-services.log
 done
 
 # Special handling for Redis (6379)
 if lsof -i :6379 | grep LISTEN > /dev/null; then
     if lsof -i :6379 | grep 'redis-ser' > /dev/null; then
-        echo "Redis is already running on port 6379. Skipping Redis startup." | tee -a logs/start-services.log
+        echo "Redis is already running on port 6379. Skipping Redis startup." | tee -a $LOG_DIR/start-services.log
     else
-        echo "Error: Port 6379 is in use by a non-Redis process:" | tee -a logs/start-services.log
-        lsof -i :6379 | grep LISTEN | tee -a logs/start-services.log
-        echo "Aborting startup. Please free port 6379 and try again." | tee -a logs/start-services.log
+        echo "Error: Port 6379 is in use by a non-Redis process:" | tee -a $LOG_DIR/start-services.log
+        lsof -i :6379 | grep LISTEN | tee -a $LOG_DIR/start-services.log
+        echo "Aborting startup. Please free port 6379 and try again." | tee -a $LOG_DIR/start-services.log
         exit 1
     fi
 else
-    echo "Port 6379 is free. Redis will be started by the script." | tee -a logs/start-services.log
+    echo "Port 6379 is free. Redis will be started by the script." | tee -a $LOG_DIR/start-services.log
 fi
 
 # Start Nginx if not running
@@ -143,22 +159,22 @@ echo "Starting Nginx..."
 if ! pgrep nginx > /dev/null; then
     if [[ "$OSTYPE" == "darwin"* ]]; then
         # On macOS, use Homebrew's Nginx
-        if ! nginx -t; then
+        if ! nginx -t -c "$(pwd)/nginx.conf"; then
             echo "Error: Nginx configuration test failed"
             exit 1
         fi
-        nginx
+        nginx -c "$(pwd)/nginx.conf"
         if [ $? -ne 0 ]; then
             echo "Failed to start Nginx"
             exit 1
         fi
     else
         # On Linux, use system Nginx with sudo
-        if ! sudo nginx -t; then
+        if ! sudo nginx -t -c "$(pwd)/nginx.conf"; then
             echo "Error: Nginx configuration test failed"
             exit 1
         fi
-        sudo nginx
+        sudo nginx -c "$(pwd)/nginx.conf"
         if [ $? -ne 0 ]; then
             echo "Failed to start Nginx"
             exit 1
@@ -211,8 +227,8 @@ check_health() {
 
     echo "Checking health for $url"
     
-    while [ $retry_count -lt $max_retries ]; do
-        if curl -s "$url/actuator/health" | grep -q '"status":"UP"'; then
+    while [ $retry -lt $max_retries ]; do
+        if curl -s "$url" | grep -q '"status":"UP"'; then
             echo "Service at $url is healthy!"
             return 0
         fi
@@ -223,6 +239,57 @@ check_health() {
         fi
     done
     echo "Service at $url failed to become healthy after $max_retries retries"
+    return 1
+}
+
+# Function to check all services health
+check_all_services_health() {
+    local services=(
+        "http://localhost:8085/actuator/health"
+        "http://localhost:8081/api/github/actuator/health"
+        "http://localhost:8082/actuator/health"
+        "http://localhost:8083/actuator/health"
+        "http://localhost:8084/api/jira/actuator/health"
+    )
+    
+    local all_healthy=true
+    for service in "${services[@]}"; do
+        if ! check_health "$service"; then
+            echo "Service $service is not healthy"
+            all_healthy=false
+        fi
+    done
+    
+    if [ "$all_healthy" = true ]; then
+        echo "All services are healthy!"
+        return 0
+    else
+        echo "Some services are not healthy"
+        return 1
+    fi
+}
+
+# Function to wait for all services to be healthy
+wait_for_services() {
+    local max_retries=5
+    local retry=0
+    local wait_time=10
+
+    echo "Waiting for all services to be healthy..."
+    
+    while [ $retry -lt $max_retries ]; do
+        if check_all_services_health; then
+            echo "All services are healthy!"
+            return 0
+        fi
+        retry=$((retry + 1))
+        if [ $retry -lt $max_retries ]; then
+            echo "Some services are not healthy yet. Retry $retry/$max_retries"
+            sleep $wait_time
+        fi
+    done
+    
+    echo "Some services failed to become healthy after $max_retries retries"
     return 1
 }
 
@@ -260,22 +327,22 @@ echo "Starting Nginx..."
 if ! pgrep nginx > /dev/null; then
     if [[ "$OSTYPE" == "darwin"* ]]; then
         # On macOS, use Homebrew's Nginx
-        if ! nginx -t; then
+        if ! nginx -t -c "$(pwd)/nginx.conf"; then
             echo "Error: Nginx configuration test failed"
             exit 1
         fi
-        nginx
+        nginx -c "$(pwd)/nginx.conf"
         if [ $? -ne 0 ]; then
             echo "Failed to start Nginx"
             exit 1
         fi
     else
         # On Linux, use system Nginx with sudo
-        if ! sudo nginx -t; then
+        if ! sudo nginx -t -c "$(pwd)/nginx.conf"; then
             echo "Error: Nginx configuration test failed"
             exit 1
         fi
-        sudo nginx
+        sudo nginx -c "$(pwd)/nginx.conf"
         if [ $? -ne 0 ]; then
             echo "Failed to start Nginx"
             exit 1
@@ -289,6 +356,9 @@ fi
 # Get ports and context paths from configuration files
 echo "Reading configurations..."
 API_PORT=$(get_port "api-layer/src/main/resources/application.yml")
+if [ -z "$API_PORT" ] || [ "$API_PORT" = "6379" ]; then
+  API_PORT=8085
+fi
 API_CONTEXT=$(get_context_path "api-layer/src/main/resources/application.yml")
 GITHUB_PORT=$(get_port "integrations/github/src/main/resources/application.properties")
 GITHUB_CONTEXT=$(get_context_path "integrations/github/src/main/resources/application.properties")
@@ -312,7 +382,7 @@ echo "Starting services..."
 # Start API Layer
 echo "Starting API Layer on port $API_PORT..."
 cd api-layer
-mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dserver.port=$API_PORT" > logs/api-layer.log 2>&1 &
+mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dserver.port=$API_PORT" > $LOG_DIR/api-layer.log 2>&1 &
 API_PID=$!
 cd ..
 echo $API_PID > .api.pid
@@ -321,7 +391,7 @@ sleep 10  # Wait for API Layer to initialize
 # Start GitHub Service
 echo "Starting GitHub Service on port $GITHUB_PORT..."
 cd integrations/github
-mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dserver.port=$GITHUB_PORT" > logs/github.log 2>&1 &
+mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dserver.port=$GITHUB_PORT" > $LOG_DIR/github.log 2>&1 &
 GITHUB_PID=$!
 cd ../..
 echo $GITHUB_PID > .github.pid
@@ -330,7 +400,7 @@ sleep 5  # Wait for GitHub service to initialize
 # Start Google Service
 echo "Starting Google Service on port $GOOGLE_PORT..."
 cd integrations/google
-mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dserver.port=$GOOGLE_PORT" > logs/google.log 2>&1 &
+mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dserver.port=$GOOGLE_PORT" > $LOG_DIR/google.log 2>&1 &
 GOOGLE_PID=$!
 cd ../..
 echo $GOOGLE_PID > .google.pid
@@ -339,7 +409,7 @@ sleep 5  # Wait for Google service to initialize
 # Start Slack Service
 echo "Starting Slack Service on port $SLACK_PORT..."
 cd integrations/slack
-mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dserver.port=$SLACK_PORT" > logs/slack.log 2>&1 &
+mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dserver.port=$SLACK_PORT" > $LOG_DIR/slack.log 2>&1 &
 SLACK_PID=$!
 cd ../..
 echo $SLACK_PID > .slack.pid
@@ -348,7 +418,7 @@ sleep 5  # Wait for Slack service to initialize
 # Start Jira Service
 echo "Starting Jira Service on port $JIRA_PORT..."
 cd integrations/jira
-mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dserver.port=$JIRA_PORT" > logs/jira.log 2>&1 &
+mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dserver.port=$JIRA_PORT" > $LOG_DIR/jira.log 2>&1 &
 JIRA_PID=$!
 cd ../..
 echo $JIRA_PID > .jira.pid
@@ -357,81 +427,19 @@ sleep 5  # Wait for Jira service to initialize
 # Start UI application
 echo "Starting UI application..."
 cd ui-app
-npm start > logs/ui.log 2>&1 &
+npm start > $LOG_DIR/ui.log 2>&1 &
 UI_PID=$!
 cd ..
 echo $UI_PID > .ui.pid
 
-# Wait for services to start
-echo "Waiting for services to start"
-sleep 10  # Initial delay to allow services to start
-
-# Check health of backend services
-echo "Checking backend services health..."
-MAX_RETRIES=8
-RETRY_COUNT=0
-SERVICES_READY=false
-
-while [ $RETRY_COUNT -lt $MAX_RETRIES ] && [ "$SERVICES_READY" = false ]; do
-    echo "Attempt $((RETRY_COUNT + 1))/$MAX_RETRIES to check services..."
-    
-    # Direct API Layer health check (port 8085)
-    if curl -s "http://localhost:8085/actuator/health" | grep -q '"status":"UP"'; then
-        echo "API Layer (direct) is ready"
-    else
-        echo "API Layer (direct) not ready yet"
-    fi
-
-    # Nginx-proxied API Layer health check (port 8080)
-    if curl -s "http://localhost:8080/api/actuator/health" | grep -q '"status":"UP"'; then
-        echo "API Layer (nginx) is ready"
-
-        # Check GitHub Service
-        if curl -s "http://localhost:8080/github/actuator/health" | grep -q '"status":"UP"'; then
-            echo "GitHub Service is ready"
-            
-            # Check Google Service
-            if curl -s "http://localhost:8080/google/actuator/health" | grep -q '"status":"UP"'; then
-                echo "Google Service is ready"
-                
-                # Check Slack Service
-                if curl -s "http://localhost:8080/slack/actuator/health" | grep -q '"status":"UP"'; then
-                    echo "Slack Service is ready"
-                    
-                    # Check Jira Service
-                    if curl -s "http://localhost:8080/jira/actuator/health" | grep -q '"status":"UP"'; then
-                        echo "Jira Service is ready"
-                        SERVICES_READY=true
-                    else
-                        echo "Jira Service not ready yet"
-                    fi
-                else
-                    echo "Slack Service not ready yet"
-                fi
-            else
-                echo "Google Service not ready yet"
-            fi
-        else
-            echo "GitHub Service not ready yet"
-        fi
-    else
-        echo "API Layer (nginx) not ready yet"
-    fi
-    
-    if [ "$SERVICES_READY" = false ]; then
-        RETRY_COUNT=$((RETRY_COUNT + 1))
-        if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
-            echo "Waiting 10 seconds before next attempt..."
-            sleep 10
-        fi
-    fi
-done
-
-if [ "$SERVICES_READY" = true ]; then
-    echo "All backend services are ready. UI will be available at http://localhost:3000"
-else
-    echo "Warning: Some services failed to start properly. Check the logs for details."
+# After starting all services, wait for them to be healthy
+echo "Waiting for all services to be healthy..."
+if ! wait_for_services; then
+    echo "Error: Some services failed to become healthy"
+    exit 1
 fi
+
+echo "All services are up and running!"
 
 # Set up cleanup trap
 cleanup() {

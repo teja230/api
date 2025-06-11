@@ -66,12 +66,10 @@ fi
 # Stop Nginx
 echo "Stopping Nginx..."
 if pgrep nginx > /dev/null; then
-    if [ "$IS_MACOS" = true ]; then
-        # On macOS, use brew services
-        brew services stop nginx
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        nginx -s stop -c "$(pwd)/nginx.conf"
     else
-        # On Linux, use system service
-        sudo nginx -s stop
+        sudo nginx -s stop -c "$(pwd)/nginx.conf"
     fi
     echo "Nginx stopped gracefully"
 else

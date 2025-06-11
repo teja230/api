@@ -5,7 +5,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {"com.enterprise.agents.github", "com.enterprise.agents.common"})
+@ComponentScan(basePackages = {
+        "com.enterprise.agents.github",
+        "com.enterprise.agents.common",
+        "com.onboarding.github"
+})
 public class GitHubApplication {
     public static void main(String[] args) {
         SpringApplication.run(GitHubApplication.class, args);

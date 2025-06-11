@@ -16,7 +16,7 @@ import java.util.UUID;
 public class SsoMockController {
     private static final Map<String, String> STATE_STORE = new HashMap<>();
 
-    @GetMapping("/initiate")
+    @PostMapping("/initiate")
     public ResponseEntity<?> initiateSSO(
             HttpServletRequest request,
             HttpSession session) {
@@ -81,5 +81,10 @@ public class SsoMockController {
     public ResponseEntity<?> logout(HttpSession session) {
         session.invalidate();
         return ResponseEntity.ok(Map.of("status", "ok"));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(HttpServletRequest request, HttpSession session) {
+        return initiateSSO(request, session);
     }
 }

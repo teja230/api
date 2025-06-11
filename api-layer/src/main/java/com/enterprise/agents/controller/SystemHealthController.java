@@ -17,10 +17,10 @@ import java.util.Map;
 public class SystemHealthController {
 
     private static final Map<String, String> SERVICE_URLS = Map.of(
-            "github", "http://localhost:8085/actuator/health",
-            "google-calendar", "http://localhost:8085/actuator/health",
-            "slack", "http://localhost:8085/actuator/health",
-            "jira", "http://localhost:8085/actuator/health"
+            "github", "http://localhost:8081/api/github/actuator/health",
+            "google-calendar", "http://localhost:8082/actuator/health",
+            "slack", "http://localhost:8083/actuator/health",
+            "jira", "http://localhost:8084/api/jira/actuator/health"
     );
     @Autowired
     private RestTemplate restTemplate;

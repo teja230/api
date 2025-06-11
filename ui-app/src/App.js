@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
+import { API_BASE_URL } from './services/api';
 import Dashboard from './components/Dashboard';
 import LandingPage from './components/LandingPage';
 import Login from './components/Login';
@@ -31,7 +32,7 @@ function App() {
 
   const checkAuthStatus = async () => {
     try {
-      const response = await fetch('http://localhost:8085/api/sso/user', {
+      const response = await fetch(`${API_BASE_URL}/sso/user`, {
         credentials: 'include',
         headers: {
           'Accept': 'application/json'
@@ -61,7 +62,7 @@ function App() {
 
   const handleLogout = async () => {
     try {
-      await fetch('http://localhost:8085/api/sso/logout', {
+      await fetch(`${API_BASE_URL}/sso/logout`, {
         method: 'POST',
         credentials: 'include'
       });

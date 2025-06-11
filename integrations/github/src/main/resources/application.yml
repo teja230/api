@@ -34,10 +34,10 @@ management:
 
 github:
   client:
-    id: ${GITHUB_CLIENT_ID:your-client-id}
-    secret: ${GITHUB_CLIENT_SECRET:your-client-secret}
+    id: dummy-client-id
+    secret: dummy-client-secret
   webhook:
-    secret: ${GITHUB_WEBHOOK_SECRET:your-webhook-secret}
+    secret: dummy-webhook-secret
 
 logging:
   level:
