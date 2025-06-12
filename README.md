@@ -41,7 +41,7 @@ repeatability.
 - Internal compliance workflows
 - IT service management automation
 
-![Onboarding App](assets/dashboard.png)
+![Onboarding App](assets/app.png)
 ![Onboarding Buddy](assets/buddy.png)
 
 ## Project Structure
