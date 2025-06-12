@@ -98,45 +98,45 @@ const Login = ({ onLogin }) => {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-            }}
-          >
-            <Typography variant="h4" component="h1" gutterBottom>
-              Welcome Back
-            </Typography>
+          }}
+        >
+          <Typography variant="h4" component="h1" gutterBottom>
+            Welcome Back
+          </Typography>
             <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 4, textAlign: 'center' }}>
-              Sign in with your company account to access the onboarding dashboard
-            </Typography>
+            Sign in with your company account to access the onboarding dashboard
+          </Typography>
 
-            {error && (
-              <Alert severity="error" sx={{ mb: 4, width: '100%' }}>
-                {error}
-              </Alert>
-            )}
+          {error && (
+            <Alert severity="error" sx={{ mb: 4, width: '100%' }}>
+              {error}
+            </Alert>
+          )}
 
-            <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Button
-                variant="contained"
-                size="large"
-                startIcon={<FaBuilding />}
-                onClick={handleSSO}
-                disabled={loading}
-                sx={{ 
-                  py: 1.5,
-                  backgroundColor: '#1976d2',
-                  '&:hover': {
-                    backgroundColor: '#1565c0'
+          <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Button
+              variant="contained"
+              size="large"
+              startIcon={<FaBuilding />}
+              onClick={handleSSO}
+              disabled={loading}
+              sx={{ 
+                py: 1.5,
+                backgroundColor: '#1976d2',
+                '&:hover': {
+                  backgroundColor: '#1565c0'
                   },
                   boxShadow: 2
-                }}
-              >
-                {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign in with Company SSO'}
-              </Button>
-            </Box>
-
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 4, textAlign: 'center' }}>
-              By continuing, you agree to our Terms of Service and Privacy Policy
-            </Typography>
+              }}
+            >
+              {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign in with Company SSO'}
+            </Button>
           </Box>
+
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 4, textAlign: 'center' }}>
+            By continuing, you agree to our Terms of Service and Privacy Policy
+          </Typography>
+        </Box>
         </Paper>
       </motion.div>
     </Container>

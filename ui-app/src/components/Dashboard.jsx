@@ -115,20 +115,21 @@ const Dashboard = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
-              <Card sx={{ height: '100%' }}>
+              <Card sx={{ height: '100%', borderRadius: 3, boxShadow: 3 }}>
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <Box
                       sx={{
                         width: 48,
                         height: 48,
-                        borderRadius: '12px',
+                        borderRadius: '50%',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        bgcolor: `${stat.color}15`,
-                        color: stat.color,
-                        mr: 2
+                        bgcolor: stat.color,
+                        color: 'white',
+                        mr: 2,
+                        boxShadow: 2
                       }}
                     >
                       {stat.icon}
@@ -178,3 +179,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+

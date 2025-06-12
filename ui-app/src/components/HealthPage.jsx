@@ -18,20 +18,19 @@ import { API_BASE_URL } from '../services/api';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import GitHubIcon from '@mui/icons-material/GitHub';
-import { FaSlack } from 'react-icons/fa';
+import MessageIcon from '@mui/icons-material/Message';
 import GoogleIcon from '@mui/icons-material/Google';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import StorageIcon from '@mui/icons-material/Storage';
-import { Avatar } from '@mui/material';
 
 const getServiceIcon = (serviceId) => {
   const normalizedId = serviceId.toLowerCase().replace(/-/g, '');
-  if (normalizedId.includes('github')) return <GitHubIcon style={{ fontSize: 32 }} />;
-  if (normalizedId.includes('slack')) return <FaSlack style={{ fontSize: 32 }} />;
-  if (normalizedId.includes('google')) return <GoogleIcon style={{ fontSize: 32 }} />;
-  if (normalizedId.includes('jira')) return <BugReportIcon style={{ fontSize: 32 }} />;
-  if (normalizedId.includes('api')) return <StorageIcon style={{ fontSize: 32 }} />;
-  return <StorageIcon style={{ fontSize: 32 }} />;
+  if (normalizedId.includes('github')) return <GitHubIcon sx={{ fontSize: 32 }} />;
+  if (normalizedId.includes('slack')) return <MessageIcon sx={{ fontSize: 32 }} />;
+  if (normalizedId.includes('google')) return <GoogleIcon sx={{ fontSize: 32 }} />;
+  if (normalizedId.includes('jira')) return <BugReportIcon sx={{ fontSize: 32 }} />;
+  if (normalizedId.includes('api')) return <StorageIcon sx={{ fontSize: 32 }} />;
+  return <StorageIcon sx={{ fontSize: 32 }} />;
 };
 
 const getServiceColor = (serviceId) => {
@@ -185,62 +184,84 @@ const HealthPage = () => {
       <Grid container spacing={3}>
         {Object.entries(health.details).map(([serviceId, data]) => (
           <Grid item xs={12} sm={6} md={4} key={serviceId}>
-            <Card
-              elevation={4}
+            <Paper 
+              elevation={3}
               sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'stretch',
-                minHeight: 220,
-                borderRadius: 3,
-                boxShadow: 3,
-                p: 0,
-                overflow: 'visible',
+                borderRadius: 4,
+                overflow: 'hidden',
                 transition: 'transform 0.2s',
-                '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 }
+                '&:hover': {
+                  transform: 'translateY(-4px)'
+                }
               }}
             >
-              <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', p: 3 }}>
-                <Box display="flex" alignItems="center" gap={2} mb={2}>
-                  <Box
-                    sx={{
-                      bgcolor: getServiceColor(serviceId),
-                      color: '#fff',
-                      borderRadius: '50%',
-                      width: 56,
-                      height: 56,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: 2,
-                      fontSize: 36
-                    }}
-                  >
-                    {getServiceIcon(serviceId)}
-                  </Box>
-                  <Box>
-                    <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold', fontSize: 20 }}>
-                      {serviceId.charAt(0).toUpperCase() + serviceId.slice(1)}
-                    </Typography>
+              <Card sx={{ borderRadius: 4, boxShadow: 'none' }}>
+                <CardContent>
+                  <Box display="flex" alignItems="center" mb={2}>
+                    <Box
+                      sx={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        bgcolor: getServiceColor(serviceId),
+                        color: 'white',
+                        mr: 2,
+                        boxShadow: 2
+                      }}
+                    >
+                      {getServiceIcon(serviceId)}
+                    </Box>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold' }}>
+                        {serviceId.charAt(0).toUpperCase() + serviceId.slice(1)}
+                      </Typography>
+                      {data.description && (
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                          {data.description}
+                        </Typography>
+                      )}
+                    </Box>
                     <Chip
-                      label={data.status ? data.status.toUpperCase() : 'UNKNOWN'}
+                      label={data.status || 'UNKNOWN'}
                       color={getStatusColor(data.status)}
                       size="small"
-                      sx={{ fontWeight: 'bold', mt: 1 }}
+                      sx={{
+                        fontWeight: 'bold',
+                        '& .MuiChip-label': {
+                          px: 2
+                        }
+                      }}
                     />
                   </Box>
-                </Box>
-                {data.error && (
-                  <Alert severity="error" sx={{ width: '100%', mb: 1 }}>
-                    {data.error}
-                  </Alert>
-                )}
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                  Last checked: {formatLastChecked(data.lastChecked)}
-                </Typography>
-                {/* Optionally, add a description for each service here if available */}
-              </CardContent>
-            </Card>
+                  {data.error && (
+                    <Alert severity="error" sx={{ mt: 1 }}>
+                      {data.error}
+                    </Alert>
+                  )}
+                  {data.details && data.details.lastChecked ? (
+                    <Box sx={{ mt: 2 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Last checked: {formatLastChecked(data.details.lastChecked)}
+                      </Typography>
+                    </Box>
+                  ) : (
+                    <Box sx={{ mt: 2 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Last checked: {formatLastChecked(Date.now())}
+                      </Typography>
+                    </Box>
+                  )}
+                </CardContent>
+              </Card>
+            </Paper>
           </Grid>
         ))}
-      </Grid
+      </Grid>
+    </Container>
+  );
+};
+
+export default HealthPage;

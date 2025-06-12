@@ -26,13 +26,13 @@ repeatability.
 **Key Features:**
 
 - Cross-tool unified onboarding (Slack, Jira, GitHub, Google etc.)
+- Onboarding chat agent that guides new employees through setup and knowledge transfer
 
 **Planned Features:**
 
 - Context-aware, multi-step task automation
 - Human-in-the-loop escalation
 - Workflow auditing and traceability
-- Onboarding chat agent that guides new employees through setup and knowledge transfer
 
 **Use Cases:**
 
@@ -41,7 +41,8 @@ repeatability.
 - Internal compliance workflows
 - IT service management automation
 
-![Onboarding App](img.png)
+![Onboarding App](assets/dashboard.png)
+![Onboarding Buddy](assets/buddy.png)
 
 ## Project Structure
 

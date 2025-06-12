@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
+import { 
+  Box, 
+  Card, 
+  CardContent, 
   Typography,
-  Grid,
-  Chip,
+  Grid, 
+  Chip, 
   Button,
-  CircularProgress,
+  CircularProgress, 
   Alert,
   Container,
   Paper,
@@ -175,30 +175,31 @@ const IntegrationsPage = () => {
 
   // Check status after OAuth callback
   useEffect(() => {
-    const connectingIntegration = sessionStorage.getItem('connectingIntegration');
-    if (connectingIntegration) {
-      sessionStorage.removeItem('connectingIntegration');
+      const connectingIntegration = sessionStorage.getItem('connectingIntegration');
+      if (connectingIntegration) {
+          sessionStorage.removeItem('connectingIntegration');
       checkStatuses();
     }
   }, [checkStatuses]);
 
   const renderIntegrationCard = (integration) => (
     <Grid item xs={12} sm={6} md={6} key={integration.id}>
-      <Paper elevation={3}>
-        <Card>
+      <Paper elevation={3} sx={{ borderRadius: 4, overflow: 'hidden' }}>
+        <Card sx={{ borderRadius: 4, boxShadow: 'none' }}>
           <CardContent>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
               <Box
                 sx={{
                   width: 48,
                   height: 48,
-                  borderRadius: '12px',
+                  borderRadius: 3,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   bgcolor: integration.color,
                   color: 'white',
-                  mr: 2
+                  mr: 2,
+                  boxShadow: 2
                 }}
               >
                 {integration.icon}
@@ -228,11 +229,9 @@ const IntegrationsPage = () => {
                 </Button>
               )}
             </Box>
-
             <Typography variant="body1" sx={{ mb: 3 }}>
               {integration.description}
             </Typography>
-
             <Box>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                 Features
@@ -306,4 +305,4 @@ const IntegrationsPage = () => {
   );
 };
 
-export default IntegrationsPage; 
+export default IntegrationsPage;

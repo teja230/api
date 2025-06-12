@@ -43,8 +43,8 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     # macOS
     if ! command -v brew >/dev/null; then
         echo "Error: Homebrew is not installed. Please install it first." >&2
-        exit 1
-    fi
+  exit 1
+fi
 
     echo "Installing dependencies using Homebrew..."
     # Never use sudo for Homebrew commands on macOS
@@ -65,8 +65,8 @@ else
     run_with_sudo apt-get update
     run_with_sudo apt-get install -y openjdk-17-jdk maven nodejs npm redis-server nginx
 
-    # Install Node.js 18 from NodeSource
-    curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+# Install Node.js 18 from NodeSource
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
     run_with_sudo apt-get install -y nodejs
 fi
 

@@ -13,6 +13,7 @@ import Header from './components/Header';
 import ViewProgress from './components/ViewProgress';
 import ViewReports from './components/ViewReports';
 import NewTeamPage from './components/NewTeamPage';
+import OnboardingChatAgent from './components/OnboardingChatAgent';
 
 const theme = createTheme({
   palette: {
@@ -184,6 +185,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/onboarding-agent" element={<OnboardingChatAgent />} />
 
           {/* Catch all route */}
           <Route path="*" element={<Navigate to="/" replace />} />
@@ -194,4 +196,3 @@ function App() {
 }
 
 export default App;
-

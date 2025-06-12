@@ -244,7 +244,7 @@ check_health() {
         retry=$((retry + 1))
         if [ $retry -lt $max_retries ]; then
             echo "Service not healthy yet. Retry $retry/$max_retries"
-            sleep $wait_time
+        sleep $wait_time
         fi
     done
     echo "Service at $url failed to become healthy after $max_retries retries"
