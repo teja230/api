@@ -33,6 +33,7 @@ repeatability.
 - Context-aware, multi-step task automation
 - Human-in-the-loop escalation
 - Workflow auditing and traceability
+- LLM-driven decision-training and onboarding-buddy optimization
 
 **Use Cases:**
 
